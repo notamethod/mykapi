@@ -1,12 +1,10 @@
-package org.dpr.mykeys.app.keystore;
+package org.dpr.mykeys.app.keystore.repository;
 
+import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.certificate.CertificateValue;
-import org.dpr.mykeys.app.repository.keystore.Pkcs12KeystoreRepository;
-import org.dpr.mykeys.app.repository.RepositoryException;
-import org.dpr.mykeys.app.repository.keystore.DerKeystoreRepository;
-import org.dpr.mykeys.app.repository.keystore.JksKeystoreRepository;
-import org.dpr.mykeys.app.repository.keystore.KeystoreRepository;
-import org.dpr.mykeys.app.repository.keystore.PemKeystoreRepository;
+import org.dpr.mykeys.app.keystore.KeyStoreHelper;
+import org.dpr.mykeys.app.keystore.KeyStoreValue;
+import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.security.PrivateKey;
 import java.util.List;
@@ -44,6 +42,6 @@ public interface MkKeystore {
 
     void addCert(KeyStoreValue ki, CertificateValue certificate) throws ServiceException;
 
-    void save(KeyStoreValue ksValue, KeystoreRepository.SAVE_OPTION option) throws RepositoryException;
+    void save(KeyStoreValue ksValue, KeyStoreHelper.SAVE_OPTION option) throws RepositoryException;
 
 }

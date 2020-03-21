@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.dpr.mykeys.utils;
+package org.dpr.mykeys.app.utils;
 
 import java.io.*;
 import java.security.GeneralSecurityException;

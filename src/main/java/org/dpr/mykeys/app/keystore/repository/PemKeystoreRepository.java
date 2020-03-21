@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.repository.keystore;
+package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -9,10 +9,9 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.keystore.KeyStoreHelper;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.keystore.ServiceException;
-import org.dpr.mykeys.app.repository.EntityAlreadyExistsException;
-import org.dpr.mykeys.app.repository.RepositoryException;
+import org.dpr.mykeys.app.ServiceException;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class PemKeystoreRepository extends KeystoreRepository {
+class PemKeystoreRepository extends KeystoreRepository {
 
     public static final String BEGIN_PEM = "-----BEGIN CERTIFICATE-----";
     public static final String END_PEM = "-----END CERTIFICATE-----";
@@ -68,9 +67,9 @@ public class PemKeystoreRepository extends KeystoreRepository {
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(KeyStoreValue ksValue, KeyStoreHelper.SAVE_OPTION option) throws RepositoryException {
         File f = new File(ksValue.getPath());
-        if (f.exists() && option.equals(SAVE_OPTION.NONE)) {
+        if (f.exists() && option.equals(KeyStoreHelper.SAVE_OPTION.NONE)) {
             throw new EntityAlreadyExistsException("File already exists " + f.getAbsolutePath());
         }
         /* save the public key in a file */

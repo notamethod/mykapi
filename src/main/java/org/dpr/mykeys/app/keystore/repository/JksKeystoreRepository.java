@@ -1,11 +1,11 @@
-package org.dpr.mykeys.app.repository.keystore;
+package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.keystore.ServiceException;
+import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
@@ -13,7 +13,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.List;
 
-public class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
+class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
     private static final Log log = LogFactory.getLog(JksKeystoreRepository.class);
 

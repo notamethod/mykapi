@@ -1,6 +1,5 @@
-package org.dpr.mykeys;
+package org.dpr.mykeys.app.utils;
 
-import org.apache.commons.cli.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -8,7 +7,6 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;

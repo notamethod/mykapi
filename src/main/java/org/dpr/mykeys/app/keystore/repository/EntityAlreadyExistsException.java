@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.repository;
+package org.dpr.mykeys.app.keystore.repository;
 
 public class EntityAlreadyExistsException extends RepositoryException {
     public EntityAlreadyExistsException(String s) {

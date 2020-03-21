@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.keystore;
+package org.dpr.mykeys.app;
 
 public class ServiceException extends Exception {
 

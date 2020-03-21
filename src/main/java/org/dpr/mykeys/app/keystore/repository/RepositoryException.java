@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.repository;
+package org.dpr.mykeys.app.keystore.repository;
 
 public class RepositoryException extends Exception {
     public RepositoryException(String s) {

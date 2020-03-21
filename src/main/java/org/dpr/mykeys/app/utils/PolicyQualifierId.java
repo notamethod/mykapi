@@ -1,4 +1,4 @@
-package org.dpr.mykeys.utils;
+package org.dpr.mykeys.app.utils;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 

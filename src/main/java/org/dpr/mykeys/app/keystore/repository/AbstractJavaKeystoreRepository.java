@@ -1,19 +1,17 @@
-package org.dpr.mykeys.app.repository.keystore;
+package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.keystore.KeyStoreHelper;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.KeystoreBuilder;
-import org.dpr.mykeys.app.keystore.ServiceException;
+import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.StoreFormat;
-import org.dpr.mykeys.app.repository.EntityAlreadyExistsException;
-import org.dpr.mykeys.app.repository.RepositoryException;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -95,7 +93,7 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(KeyStoreValue ksValue, KeyStoreHelper.SAVE_OPTION option) throws RepositoryException {
         File file = new File(ksValue.getPath());
         boolean exists = file.exists();
         try {

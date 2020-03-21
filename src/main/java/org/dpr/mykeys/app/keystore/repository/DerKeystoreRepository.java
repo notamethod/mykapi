@@ -1,12 +1,11 @@
-package org.dpr.mykeys.app.repository.keystore;
+package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.keystore.KeyStoreHelper;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.keystore.MkKeystore;
-import org.dpr.mykeys.app.keystore.ServiceException;
-import org.dpr.mykeys.app.repository.RepositoryException;
+import org.dpr.mykeys.app.ServiceException;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -15,7 +14,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-public class DerKeystoreRepository extends KeystoreRepository implements MkKeystore {
+class DerKeystoreRepository extends KeystoreRepository implements MkKeystore {
 
     private static final Log log = LogFactory.getLog(DerKeystoreRepository.class);
 
@@ -47,10 +46,10 @@ public class DerKeystoreRepository extends KeystoreRepository implements MkKeyst
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(KeyStoreValue ksValue, KeyStoreHelper.SAVE_OPTION option) throws RepositoryException {
 
         File file = new File(ksValue.getPath() + ".der");
-        if (file.exists() && option.equals(SAVE_OPTION.NONE)) {
+        if (file.exists() && option.equals(KeyStoreHelper.SAVE_OPTION.NONE)) {
             throw new RepositoryException("File already exists " + file.getAbsolutePath());
         }
         try {

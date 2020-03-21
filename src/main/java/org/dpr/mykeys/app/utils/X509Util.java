@@ -1,4 +1,4 @@
-package org.dpr.mykeys.utils;
+package org.dpr.mykeys.app.utils;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
