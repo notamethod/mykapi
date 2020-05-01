@@ -27,42 +27,38 @@ import java.util.Map;
 
 import static org.dpr.mykeys.app.utils.CertificateUtils.randomBigInteger;
 
-class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
+public class CertificateBuilder implements CertificateGeneratorExtensions {
 
-    private final Log log = LogFactory.getLog(CertificateGeneratorStandard.class);
+    private final String DEFAULT_SIGNATURE_ALGORITHM="SHA256WithRSAEncryption";
+    private final String DEFAULT_KEY_ALGORITHM="RSA";
+    private final int DEFAULT_KEY_SIZE=2048;
+
+    private final Log log = LogFactory.getLog(CertificateBuilder.class);
     private static final int AUTH_VALIDITY = 999;
+    private static final int DEFAULT_VALIDITY = 365;
 
-    public CertificateGeneratorStandard() {
+    private X509Certificate issuerCertificate = null;
+    private PrivateKey issuerPrivateKey;
+
+    private KeyPair keyPair  = null;
+    private Date startingDate;
+    private Date endingDate;
+    private String alias;
+    private String signatureAlgorithm = DEFAULT_SIGNATURE_ALGORITHM;
+    private BigInteger serialNumber;
+    private String freeSubject;
+    private int keyUsage;
+
+    public CertificateBuilder() {
         super();
     }
-
-
-    /**
-     * Key pair generation
-     *
-     * @param algorithm
-     * @param keyLength
-     */
-    private KeyPair generateKeyPair(String algorithm, int keyLength) throws ServiceException {
-        KeyPair keypair = null;
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("generating keypair: " + algorithm + " keypair: " + keyLength);
-            }
-
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm, "BC");
-            keyGen.initialize(keyLength);
-
-            keypair = keyGen.genKeyPair();
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new ServiceException("keypair generation error", e);
-        }
-        return keypair;
+    public CertificateBuilder(X509Certificate issuerCertificate, PrivateKey issuerPrivateKey) {
+        this.issuerPrivateKey = issuerPrivateKey;
+        this.issuerCertificate = issuerCertificate;
     }
 
+    @Override
     public void addExtensions(X509v3CertificateBuilder certGen, Map<String, String> parameters) throws IOException {
-
-
         Extension en = new Extension(Extension.basicConstraints,
                 false,
                 new BasicConstraints(false).getEncoded());
@@ -70,93 +66,131 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
     }
 
-    public CertificateValue generate(KeyPair keypair, CertificateValue certModel)
-            throws Exception {
-        return generate(keypair, certModel, certModel);
+
+
+    public CertificateBuilder withAlias(String alias){
+        this.alias = alias;
+        return this;
+    }
+    public CertificateBuilder withSerial(BigInteger serial){
+        this.serialNumber = serial;
+        return this;
     }
 
-    public CertificateValue generate(KeyPair keypair, CertificateValue certModel, CertificateValue certIssuer)
+    public CertificateBuilder withSubject(String subject){
+        this.freeSubject = subject;
+        return this;
+    }
+    public CertificateBuilder withKeyUsage(int keyUsage){
+        this.keyUsage = keyUsage;
+        return this;
+    }
+
+    public CertificateBuilder withKeyPair(KeyPair keyPair){
+        this.keyPair = keyPair;
+        return this;
+    }
+
+    public CertificateBuilder withStartingDate(Date date){
+        this.startingDate = date;
+        return this;
+    }
+    public CertificateBuilder withEndingDate(Date date){
+        this.endingDate = date;
+        return this;
+    }
+    public CertificateBuilder withDuration(int duration){
+       //TODO duration
+        return this;
+    }
+    public CertificateBuilder withIssuerPrivateKey(PrivateKey pk){
+        this.issuerCertificate = issuerCertificate;
+        return this;
+    }
+
+    public CertificateBuilder withSignatureAlgorithm(String algo){
+        this.signatureAlgorithm=algo;
+        return this;
+    }
+    public X509Certificate build()
             throws Exception {
 
-
-        JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
-
-
-        // SerialNumber
-        BigInteger serial = randomBigInteger(30);
-        if (StringUtils.isBlank(certModel.getAlias())) {
-            certModel.setAlias(serial.toString(16));
+        // defaults -------------------------------------------
+        //keypair
+        if (keyPair == null){
+            log.info("generating default keypair");
+            CertificateManager certificateManager = new CertificateManager();
+            keyPair = certificateManager.generateKeyPair(DEFAULT_KEY_ALGORITHM, DEFAULT_KEY_SIZE);
         }
 
-        X500Name subject = certModel.getFreeSubject() == null ? certModel.subjectMapToX500Name() : certModel.freeSubjectToX500Name();
+        if (null == serialNumber)
+            serialNumber = randomBigInteger(30);
+
+        if (StringUtils.isBlank(alias)) {
+            alias=serialNumber.toString(16);
+        }
+
+        X500Name subject = freeSubject == null ? new X500Name("CN=user") : new X500Name(freeSubject);
 
         //issuer
         X500Name issuerDN;
-        if (certIssuer != null && certIssuer.getCertificate() != null) {
-            log.info("certificate generated from issuer..." + certIssuer.getName());
-
-            issuerDN = X500Name.getInstance(certIssuer.getCertificate().getSubjectX500Principal().getEncoded());
+        if (issuerCertificate != null) {
+            log.info("certificate generated from issuer..." + issuerCertificate.getSubjectDN());
+            issuerDN = X500Name.getInstance(issuerCertificate.getSubjectX500Principal().getEncoded());
         } else {
             issuerDN = subject;
         }
 
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuerDN, serial, certModel.getFrom(), certModel.getTo(), subject,
-                keypair.getPublic());
+        if (startingDate == null){
+            startingDate= new Date();
+            if (endingDate == null) {
+                endingDate = new Date(System.currentTimeMillis() + (DEFAULT_VALIDITY * 86400000L));
+            }
+        }
 
+
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuerDN,
+                serialNumber,
+                startingDate,
+                endingDate,
+                subject,
+                keyPair.getPublic());
+
+        JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
 
         addExtensions(certGen, null);
-        certGen.addExtension(Extension.keyUsage, true, new KeyUsage(certModel.getIntKeyUsage()));
-        certGen.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(keypair.getPublic()));
-
-        // FIXME: à vérifier en cas de auto signé
-        if (certIssuer != null && certIssuer.getCertificate() != null) {
-            certGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(certIssuer.getCertificate()));
-        } else {
-            certGen.addExtension(Extension.authorityKeyIdentifier, false,
-                    extUtils.createAuthorityKeyIdentifier(keypair.getPublic()));
-        }
-
-
-        if (StringUtils.isNotBlank(certModel.getPolicyCPS())) {
-            ASN1EncodableVector qualifiers = getPolicyInformation(certModel.getPolicyID(), certModel.getPolicyCPS(), certModel.getPolicyNotice());
-            certGen.addExtension(Extension.certificatePolicies, false, new DERSequence(qualifiers));
-
-
-//            PolicyQualifierInfo policyQualifierInfo = new PolicyQualifierInfo(certModel.getPolicyCPS());
-//            PolicyInformation policyInformation = new PolicyInformation(PolicyQualifierId.id_qt_cps,
-//                    new DERSequence(policyQualifierInfo));
-//            ASN1EncodableVector certificatePolicies = new ASN1EncodableVector();
-//            final UserNotice un = new UserNotice(null, new DisplayText(DisplayText.CONTENT_TYPE_UTF8STRING, certModel.getPolicyNotice()));
-//            PolicyQualifierInfo not = new PolicyQualifierInfo(PolicyQualifierId.id_qt_unotice, un);
-//            certificatePolicies.add(policyInformation);
-//            certificatePolicies.add(not);
-//            if (!certModel.getPolicyID().isEmpty()) {
-//                PolicyInformation extraPolicyInfo = new PolicyInformation(new ASN1ObjectIdentifier(certModel.getPolicyID()),
-//                        new DERSequence(new ASN1ObjectIdentifier("")));
-//                certificatePolicies.add(extraPolicyInfo);
-//            }
-
-
-        }
-
-        // gen.addExtension(X509Extensions.ExtendedKeyUsage, true,
-        // new ExtendedKeyUsage(KeyPurposeId.id_kp_clientAuth));
-
-        // self signed ?
+        certGen.addExtension(Extension.keyUsage, true, new KeyUsage(keyUsage));
+        certGen.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(keyPair.getPublic()));
 
         PrivateKey pk;
         PublicKey pubKey;
-        if (certIssuer == null || certModel.getSubjectString().equalsIgnoreCase(certIssuer.getSubjectString())) {
-            pk = keypair.getPrivate();
-            pubKey = keypair.getPublic();
-        } else {
-            pk = certIssuer.getPrivateKey();
-            pubKey = certIssuer.getPublicKey();
+
+        // FIXME: à vérifier en cas de auto signé
+        if (issuerCertificate != null && issuerPrivateKey ==null) {
+            throw new ServiceException("issuer private key can not be null");
         }
-        ContentSigner signer = new JcaContentSignerBuilder(certModel.getAlgoSig()).build(pk);
+        if (issuerCertificate != null) {
+            certGen.addExtension(Extension.authorityKeyIdentifier, false,
+                    extUtils.createAuthorityKeyIdentifier(issuerCertificate));
+            pk = issuerPrivateKey;
+            pubKey = issuerCertificate.getPublicKey();
+        } else {
+            certGen.addExtension(Extension.authorityKeyIdentifier, false,
+                    extUtils.createAuthorityKeyIdentifier(keyPair.getPublic()));
+            pk = keyPair.getPrivate();
+            pubKey = keyPair.getPublic();
+        }
+
+        //TODO policies
+
+        // self signed ?
+
+
+
+        ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm).build(pk);
 
         X509CertificateHolder certHolder = certGen.build(signer);
-
+        log.info("certificate generated");
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(ProviderUtil.provider).getCertificate(certHolder);
         // TODO: let generate expired certificate for test purpose ?
         try {
@@ -166,30 +200,31 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
         }
 
         cert.verify(pubKey);
+        log.info("certificate verified");
+        // FIXME: gérer la chaine
+//        X509Certificate[] certChain = null;
+//        // FIXME: gérer la chaine de l'émetteur
+//        if (certIssuer != null && certIssuer.getCertificateChain() != null) {
+//            log.info("adding issuer " + certIssuer.getName() + "'s certicate chain to certificate");
+//            certChain = new X509Certificate[certIssuer.getCertificateChain().length + 1];
+//            System.arraycopy(certIssuer.getCertificateChain(), 0, certChain, 1,
+//                    certIssuer.getCertificateChain().length);
+//            certChain[0] = cert;
+//            // certChain[1] = certIssuer.getCertificate();
+//        } else if (certIssuer != null && certIssuer.getCertificate() != null) {
+//            log.error("FIXME");
+//            certChain = new X509Certificate[2];
+//            certChain[0] = cert;
+//            certChain[1] = certIssuer.getCertificate();
+//        } else {
+//            certChain = new X509Certificate[]{cert};
+//        }
+//        CertificateValue certReturn = new CertificateValue(certChain);
+//        certReturn.setPrivateKey(keypair.getPrivate());
+//        certReturn.setPublicKey(keypair.getPublic());
+//        certReturn.setPassword(certModel.getPassword());
 
-        X509Certificate[] certChain = null;
-        // FIXME: gérer la chaine de l'émetteur
-        if (certIssuer != null && certIssuer.getCertificateChain() != null) {
-            log.info("adding issuer " + certIssuer.getName() + "'s certicate chain to certificate");
-            certChain = new X509Certificate[certIssuer.getCertificateChain().length + 1];
-            System.arraycopy(certIssuer.getCertificateChain(), 0, certChain, 1,
-                    certIssuer.getCertificateChain().length);
-            certChain[0] = cert;
-            // certChain[1] = certIssuer.getCertificate();
-        } else if (certIssuer != null && certIssuer.getCertificate() != null) {
-            log.error("FIXME");
-            certChain = new X509Certificate[2];
-            certChain[0] = cert;
-            certChain[1] = certIssuer.getCertificate();
-        } else {
-            certChain = new X509Certificate[]{cert};
-        }
-        CertificateValue certReturn = new CertificateValue(certChain);
-        certReturn.setPrivateKey(keypair.getPrivate());
-        certReturn.setPublicKey(keypair.getPublic());
-        certReturn.setPassword(certModel.getPassword());
-
-        return certReturn;
+        return cert;
 
     }
 

@@ -23,18 +23,10 @@ public class CertificateManager {
         super();
     }
 
-    public CertificateValue createCertificate(CertificateType type, String id, char[] charArray) throws ServiceException {
+    public CertificateValue createLoginCertificate(String id, char[] charArray) throws ServiceException {
         CertificateGeneratorStandard certGen = new CertificateGeneratorStandard();
         KeyPair keyPair = generateKeyPair("RSA", 2048);
-        switch (type) {
-            case AUTH_MK:
-                return certGen.createCertificateAuth(id, charArray, keyPair);
-
-            default:
-                break;
-        }
-        return null;
-
+        return certGen.createCertificateAuth(id, charArray, keyPair);
     }
 
 
@@ -46,7 +38,6 @@ public class CertificateManager {
         switch (usage) {
             case STANDARD:
                 certGen = new CertificateGeneratorStandard();
-
                 break;
             case AC:
                 certGen = new CertificateGeneratorStandard() {

@@ -2,6 +2,7 @@ package org.dpr.mykeys.app.keystore;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dpr.mykeys.app.CertificateType;
 import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.repository.EntityAlreadyExistsException;
@@ -17,6 +18,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     private static final Log log = LogFactory.getLog(KeyStoreHelper.class);
@@ -522,16 +526,19 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     }
 
 
-    public Map<String, String> getMapStringCerts(KeyStoreValue ksv) {
+    public Map<String, String> getCAMapAlias(KeyStoreValue ksv) throws ServiceException {
         MkKeystore mks = MkKeystore.getInstance(ksv.getStoreFormat());
-        Map<String, String> certsAC = new HashMap<>();
-        try {
-            for (CertificateValue cv : mks.getCertificates(ksv)) {
-                certsAC.put(cv.getName(), cv.getAlias());
-            }
-        } catch (ServiceException e) {
-            e.printStackTrace();
-        }
+      //  Map<String, String> certsAC = new HashMap<>();
+        List<CertificateValue> certs = mks.getCertificates(ksv);
+
+            Map<String, String> certsAC  = certs.stream().
+                    filter(cert -> CertificateType.AC.equals(cert.getType())).
+                    collect(
+                    toMap(CertificateValue::getName,
+                            CertificateValue::getAlias,
+                            (oldValue, newValue) -> newValue
+                    )
+            );
 
         return certsAC;
 

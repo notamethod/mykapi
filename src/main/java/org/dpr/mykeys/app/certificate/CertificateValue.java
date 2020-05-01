@@ -20,6 +20,7 @@ import org.dpr.mykeys.app.utils.PoliciesException;
 import org.dpr.mykeys.app.utils.PoliciesUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -44,9 +45,28 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     private char[] password;
     private byte[] signature;
     private int keyLength;
+
+    public int getKeyUsageInt() {
+        return keyUsageInt;
+    }
+
+    public void setKeyUsageInt(int keyUsageInt) {
+        this.keyUsageInt = keyUsageInt;
+    }
+
+    private int keyUsageInt;
     private final Hashtable x509PrincipalMap = new Hashtable();
     private final Map<String, String> subjectMap = new LinkedHashMap<>();
 
+    public BigInteger getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(BigInteger serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    private BigInteger serialNumber;
 
     private String freeSubject;
     private String alias;
@@ -473,6 +493,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     /**
      * @return the keyUsage
      */
+    @Deprecated
     public boolean[] getKeyUsage() {
         return keyUsage;
     }
@@ -480,10 +501,12 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     /**
      * @param keyUsage the keyUsage to set
      */
+    @Deprecated
     public void setKeyUsage(boolean[] keyUsage) {
         this.keyUsage = keyUsage;
     }
 
+    @Deprecated
     public int getIntKeyUsage() {
         int iku = 0;
         if (keyUsage != null) {

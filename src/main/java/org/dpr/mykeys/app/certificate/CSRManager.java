@@ -44,19 +44,20 @@ public class CSRManager {
     /**
      * Generate a X509 certificate from CSR file
      *
-     * @param fic
+     * @param is the csr
+     * @param issuer the issuer
      * @return
      * @throws ServiceException
      * @throws IOException
      */
-    public CertificateValue generateCertificate(InputStream fic, CertificateValue issuer) throws ServiceException, IOException {
+    public CertificateValue generateCertificate(InputStream is, CertificateValue issuer) throws ServiceException, IOException {
 
         X509Certificate[] certificates = null;
         CertificateValue cert = null;
         try {
 
             Object pemcsr;
-            BufferedReader buf = new BufferedReader(new InputStreamReader(fic));
+            BufferedReader buf = new BufferedReader(new InputStreamReader(is));
 
             //xCert = builder.generateFromCSR(buf, issuer).get();
             PemReader reader = new PemReader(buf);
@@ -79,7 +80,7 @@ public class CSRManager {
             }
             cert = new CertificateValue(certificates);
         } catch (GeneralSecurityException | OperatorCreationException e) {
-            throw new ServiceException("error on certificate generation fro csr file " + fic, e);
+            throw new ServiceException("error on certificate generation fro csr file " + is, e);
         }
 
 
