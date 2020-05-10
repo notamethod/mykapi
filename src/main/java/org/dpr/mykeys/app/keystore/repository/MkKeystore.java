@@ -3,11 +3,16 @@ package org.dpr.mykeys.app.keystore.repository;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateException;
 import java.util.List;
 
 public interface MkKeystore {
@@ -26,13 +31,15 @@ public interface MkKeystore {
         }
     }
 
+    MKKeystoreValue create(String name, char[] password)  throws RepositoryException, IOException;
+
     void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificatesInfo) throws
             ServiceException;
 
     void savePrivateKey(PrivateKey privateKey, String fName, char[] pass)
             throws ServiceException;
 
-     void exportPrivateKey(PrivateKey privateKey, OutputStream os, char[] pass)
+    void exportPrivateKey(PrivateKey privateKey, OutputStream os, char[] pass)
             throws ServiceException;
 
     void saveCertificates(KeyStoreValue ksValue, List<CertificateValue> certInfos);

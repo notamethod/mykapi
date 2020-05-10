@@ -8,4 +8,8 @@ public class RepositoryException extends Exception {
     public RepositoryException(String s, Exception e) {
         super(s, e);
     }
+
+    public RepositoryException(Exception e) {
+        super(e);
+    }
 }

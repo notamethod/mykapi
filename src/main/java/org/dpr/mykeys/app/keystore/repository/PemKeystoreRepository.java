@@ -10,22 +10,29 @@ import org.bouncycastle.util.io.pem.PemReader;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.PEMType;
+import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-class PemKeystoreRepository extends KeystoreRepository {
+class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
 
 
     private static final Log log = LogFactory.getLog(PemKeystoreRepository.class);
 
 
+
     public PemKeystoreRepository() {
+        this.format= StoreFormat.PEM;
     }
 
 
@@ -79,6 +86,8 @@ class PemKeystoreRepository extends KeystoreRepository {
             throw new RepositoryException("Export de la clé publique impossible:", e);
         }
     }
+
+
 
     public void savePrivateKey(PrivateKey privateKey, String fName, char[] pass)
             throws ServiceException {

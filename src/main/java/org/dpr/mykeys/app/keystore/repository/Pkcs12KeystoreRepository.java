@@ -12,7 +12,10 @@ import java.util.List;
 class Pkcs12KeystoreRepository extends AbstractJavaKeystoreRepository {
 
     private static final Log log = LogFactory.getLog(JksKeystoreRepository.class);
-    protected final StoreFormat format = StoreFormat.PKCS12;
+
+    public Pkcs12KeystoreRepository() {
+        this.format = StoreFormat.PKCS12;
+    }
 
     @Override
     public void savePrivateKey(PrivateKey privateKey, String fName, char[] pass) {

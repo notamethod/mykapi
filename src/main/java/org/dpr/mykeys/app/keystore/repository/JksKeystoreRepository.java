@@ -17,9 +17,10 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
     private static final Log log = LogFactory.getLog(JksKeystoreRepository.class);
 
-    protected final StoreFormat format = StoreFormat.JKS;
+    //protected final StoreFormat format = StoreFormat.JKS;
 
     public JksKeystoreRepository() {
+        this.format = StoreFormat.JKS;
     }
 
     @Override

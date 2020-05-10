@@ -8,6 +8,7 @@ import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.KeystoreBuilder;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
@@ -28,17 +29,25 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
 
     private static final Log log = LogFactory.getLog(AbstractJavaKeystoreRepository.class);
 
-    private KeyStore create(String name, StoreFormat format, char[] password) throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
-        KeyStore keystore = KeyStore.getInstance(format.toString());
+    public MKKeystoreValue create(String name, char[] password) throws RepositoryException, IOException {
+
         Path path = Paths.get(name);
         if (path.toFile().exists()) {
             throw new IOException("File already exists " + path.toString());
         }
-        keystore.load(null, password);
-        OutputStream fos = new FileOutputStream(new File(name));
-        keystore.store(fos, password);
-        fos.close();
-        return keystore;
+        try {
+            KeyStore keystore = KeyStore.getInstance(format.toString());
+            keystore.load(null, password);
+            OutputStream fos = new FileOutputStream(new File(name));
+            keystore.store(fos, password);
+            fos.close();
+        } catch (Exception e) {
+           throw new RepositoryException(e);
+        }
+
+        MKKeystoreValue keyStoreValue = new KeyStoreValue( name,  format);
+
+        return keyStoreValue;
     }
 
     private void addCerts(KeyStoreValue ksValue) throws RepositoryException {
@@ -102,7 +111,7 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
                         throw new EntityAlreadyExistsException("File already exists " + file.getAbsolutePath());
                     case REPLACE:
                         FileUtils.deleteQuietly(file);
-                        create(ksValue.getPath(), getFormat(), ksValue.getPassword());
+                        create(ksValue.getPath(), ksValue.getPassword());
                         break;
                     case ADD:
                         loadKeyStore(ksValue.getPath(), getFormat(), ksValue.getPassword());
@@ -112,7 +121,7 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
                         break;
                 }
             } else {
-                create(ksValue.getPath(), getFormat(), ksValue.getPassword());
+                create(ksValue.getPath(), ksValue.getPassword());
             }
 
         } catch (Exception e) {

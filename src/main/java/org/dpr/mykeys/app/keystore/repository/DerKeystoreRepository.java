@@ -5,20 +5,26 @@ import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
+import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-class DerKeystoreRepository extends KeystoreRepository implements MkKeystore {
+class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements MkKeystore {
 
     private static final Log log = LogFactory.getLog(DerKeystoreRepository.class);
 
 
     public DerKeystoreRepository() {
+        this.format= StoreFormat.DER;
     }
 
 

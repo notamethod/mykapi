@@ -11,7 +11,7 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyStoreValue implements NodeInfo {
+public class KeyStoreValue implements NodeInfo, MKKeystoreValue {
 
     public static final Log log = LogFactory.getLog(KeyStoreValue.class);
     private String name;
