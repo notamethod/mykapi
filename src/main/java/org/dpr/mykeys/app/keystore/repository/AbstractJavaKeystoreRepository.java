@@ -42,23 +42,33 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
             keystore.store(fos, password);
             fos.close();
         } catch (Exception e) {
-           throw new RepositoryException(e);
+            throw new RepositoryException(e);
         }
 
-        MKKeystoreValue keyStoreValue = new KeyStoreValue( name,  format);
+        MKKeystoreValue keyStoreValue = new KeyStoreValue(name, format);
 
         return keyStoreValue;
     }
 
-    private void addCerts(KeyStoreValue ksValue) throws RepositoryException {
-
+    @Override
+    public void addCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws RepositoryException {
         try {
-            KeyStore ks = loadKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword());
+            KeyStore ks = loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword());
             KeystoreBuilder ksb = new KeystoreBuilder(ks);
-            ksb.addCerts(ksValue, ksValue.getCertificates());
-        } catch (KeyToolsException | ServiceException e) {
+            ksb.addCerts(ksValue, certificates);
+        } catch (KeyToolsException e) {
             throw new RepositoryException("addCerts fail", e);
         }
+    }
+
+
+    @Override
+    public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
+        KeyStoreValue keystoreValue = new KeyStoreValue(new File(name), this.format, password);
+
+        keystoreValue.setKeystore(loadJavaKeyStore(name, format, password));
+        keystoreValue.setCertificates(getCertificates(keystoreValue));
+        return keystoreValue;
     }
 
     /**
@@ -68,11 +78,8 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
      * @return
      * @throws KeyToolsException
      */
-    KeyStore loadKeyStore(String ksName, StoreFormat format, char[] pwd) throws ServiceException {
-        KeyStoreValue keystoreValue = new KeyStoreValue(new File(ksName), format, pwd);
-
+    KeyStore loadJavaKeyStore(String ksName, StoreFormat format, char[] pwd) throws RepositoryException {
         String type = StoreFormat.getValue(format);
-        keystoreValue.setPassword(pwd);
         KeyStore ks;
         try {
             try {
@@ -82,26 +89,25 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
             }
 
             // get user password and file input stream
-
             java.io.FileInputStream fis = new java.io.FileInputStream(ksName);
             ks.load(fis, pwd);
             fis.close();
         } catch (KeyStoreException e) {
-            throw new ServiceException("Fail to load:" + ksName, e);
-
+            throw new RepositoryException("Fail to load:" + ksName, e);
         } catch (FileNotFoundException e) {
-            throw new ServiceException("File not found:" + ksName + ", " + e.getCause(), e);
+            throw new RepositoryException("File not found:" + ksName + ", " + e.getCause(), e);
         } catch (NoSuchAlgorithmException e) {
-            throw new ServiceException("Format unknown:" + ksName + ", " + e.getCause(), e);
+            throw new RepositoryException("Format unknown:" + ksName + ", " + e.getCause(), e);
         } catch (CertificateException | IOException e) {
-            throw new ServiceException("Fail to load:" + ksName + ", " + e.getCause(), e);
+            throw new RepositoryException("Fail to load:" + ksName + ", " + e.getCause(), e);
         }
-
         return ks;
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(MKKeystoreValue inKsValue, SAVE_OPTION option) throws RepositoryException {
+
+        KeyStoreValue ksValue = (KeyStoreValue) inKsValue;
         File file = new File(ksValue.getPath());
         boolean exists = file.exists();
         try {
@@ -111,10 +117,11 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
                         throw new EntityAlreadyExistsException("File already exists " + file.getAbsolutePath());
                     case REPLACE:
                         FileUtils.deleteQuietly(file);
-                        create(ksValue.getPath(), ksValue.getPassword());
+                        create(ksValue.getPath(), ((KeyStoreValue) ksValue).getPassword());
+
                         break;
                     case ADD:
-                        loadKeyStore(ksValue.getPath(), getFormat(), ksValue.getPassword());
+                        //loadJavaKeyStore(ksValue.getPath(), getFormat(), ksValue.getPassword());
                         break;
                     default:
                         //nothing
@@ -128,19 +135,26 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
             throw new RepositoryException("creating fail", e);
         }
 
-        addCerts(ksValue);
+        try {
+            KeyStore ks = loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword());
+            KeystoreBuilder ksb = new KeystoreBuilder(ks);
+            ksb.addCerts(ksValue, ksValue.getCertificates());
+        } catch (KeyToolsException e) {
+            throw new RepositoryException("addCerts fail", e);
+        }
+
 
     }
 
-    public List<CertificateValue> getCertificates(KeyStoreValue ksValue) throws ServiceException {
+    public List<CertificateValue> getCertificates(MKKeystoreValue mksValue) throws RepositoryException {
 
+        KeyStoreValue ksValue = (KeyStoreValue) mksValue;
         if (ksValue.getCertificates() != null && !ksValue.getCertificates().isEmpty())
-            return ksValue.getChildList();
+            return ksValue.getCertificates();
         else {
-
             if (null == ksValue.getKeystore()) {
 
-                ksValue.setKeystore(loadKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
+                ksValue.setKeystore(loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
             }
             KeyStore ks = ksValue.getKeystore();
             List<CertificateValue> certs = new ArrayList<>();
@@ -174,7 +188,7 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
      * @return
      * @throws ServiceException
      */
-    private CertificateValue fillCertInfo(KeyStore ks, String alias) throws ServiceException {
+    private CertificateValue fillCertInfo(KeyStore ks, String alias) throws RepositoryException {
         CertificateValue certInfo;
         try {
             Certificate certificate = ks.getCertificate(alias);
@@ -201,19 +215,19 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
             }
 
         } catch (GeneralSecurityException e) {
-            throw new ServiceException("filling certificate Info impossible", e);
+            throw new RepositoryException("filling certificate Info impossible", e);
         }
         return certInfo;
     }
 
-    public void addCert(KeyStoreValue ksValue, CertificateValue certificate) throws ServiceException {
-        KeyStore ks = loadKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword());
+    public void addCert(KeyStoreValue ksValue, CertificateValue certificate) throws RepositoryException {
+        KeyStore ks = loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword());
         KeystoreBuilder ksb = new KeystoreBuilder(ks);
         try {
             ksb.addCert(ksValue, certificate);
             ksValue.getCertificates().add(certificate);
         } catch (KeyToolsException e) {
-            throw new ServiceException("addCerts fail", e);
+            throw new RepositoryException("addCerts fail", e);
         }
 
     }

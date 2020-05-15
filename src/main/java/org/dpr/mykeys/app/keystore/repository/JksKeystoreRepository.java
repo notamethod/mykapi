@@ -6,6 +6,7 @@ import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
@@ -23,14 +24,16 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
         this.format = StoreFormat.JKS;
     }
 
+
+
     @Override
-    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws ServiceException {
+    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws RepositoryException{
 
         try {
 
             if (null == ksValue.getKeystore()) {
 
-                ksValue.setKeystore(loadKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
+                ksValue.setKeystore(loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
             }
             List<CertificateValue> certs = getCertificates(ksValue);
 
@@ -43,7 +46,7 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
             saveKeyStore(ksValue.getKeystore(), ksValue.getPath(), ksValue.getPassword());
 
         } catch (Exception e) {
-            throw new ServiceException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -72,9 +75,9 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
     }
 
 
-    private KeyStore getKeyStore(KeyStoreValue ksValue) throws ServiceException {
+    private KeyStore getKeyStore(KeyStoreValue ksValue) throws RepositoryException {
         if (null == ksValue.getKeystore()) {
-            ksValue.setKeystore(loadKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
+            ksValue.setKeystore(loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
         }
         return ksValue.getKeystore();
     }

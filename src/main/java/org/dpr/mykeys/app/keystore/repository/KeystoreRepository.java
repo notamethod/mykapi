@@ -3,6 +3,7 @@ package org.dpr.mykeys.app.keystore.repository;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public abstract class KeystoreRepository implements MkKeystore {
 
     StoreFormat format;
 
-    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws ServiceException {
+    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws RepositoryException {
         List<CertificateValue> certs = getCertificates(ksValue);
         List<CertificateValue> certsToRemove = new ArrayList<>();
         for (CertificateValue cert : certs) {
@@ -29,7 +30,7 @@ public abstract class KeystoreRepository implements MkKeystore {
         saveCertificates(ksValue, certs);
     }
 
-    public void save(KeyStoreValue ksValue) throws RepositoryException {
+    public void save(MKKeystoreValue ksValue) throws RepositoryException {
         save(ksValue, MkKeystore.SAVE_OPTION.NONE);
     }
 

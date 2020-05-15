@@ -5,8 +5,8 @@ public enum PEMType {
     REQUEST("-----BEGIN CERTIFICATE REQUEST-----", "-----END CERTIFICATE REQUEST-----"),
     PRIVATE_KEY("-----BEGIN RSA PRIVATE KEY-----", "-----END RSA PRIVATE KEY-----");
 
-    private String begin;
-    private String end;
+    private final String begin;
+    private final String end;
 
     PEMType(String begin, String end) {
         this.begin=begin;

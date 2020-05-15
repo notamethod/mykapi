@@ -46,5 +46,15 @@ public abstract class AbstractSimpleKeystoreRepository extends KeystoreRepositor
         return keyStoreValue;
     }
 
+    @Override
+    public void addCertificates(KeyStoreValue ki, List<CertificateValue> certificates) throws RepositoryException {
+        //TODO
+    }
 
+    @Override
+    public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
+        MKKeystoreValue keystoreValue = new SimpleKeystoreValue(name, this.format);
+        keystoreValue.setCertificates(getCertificates(keystoreValue));
+        return keystoreValue;
+    }
 }

@@ -10,11 +10,8 @@ import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.GeneralName;
 
-import org.dpr.mykeys.app.CertificateType;
+import org.dpr.mykeys.app.*;
 import org.bouncycastle.jce.X509Principal;
-import org.dpr.mykeys.app.ChildInfo;
-import org.dpr.mykeys.app.ChildType;
-import org.dpr.mykeys.app.X509Constants;
 import org.dpr.mykeys.app.utils.CertificateUtils;
 import org.dpr.mykeys.app.utils.PoliciesException;
 import org.dpr.mykeys.app.utils.PoliciesUtil;
@@ -88,7 +85,6 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
 
     public CertificateValue() {
         super();
-        // x509PrincipalModel = new X509PrincipalModel();
     }
 
     public CertificateValue(String alias2) {
@@ -309,7 +305,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      * @param keyLength the keyLength to set
      */
     public void setKeyLength(String keyLength) {
-        this.keyLength = Integer.valueOf(keyLength);
+        this.keyLength = Integer.parseInt(keyLength);
     }
 
     /**
@@ -493,7 +489,6 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     /**
      * @return the keyUsage
      */
-    @Deprecated
     public boolean[] getKeyUsage() {
         return keyUsage;
     }
@@ -501,22 +496,8 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     /**
      * @param keyUsage the keyUsage to set
      */
-    @Deprecated
     public void setKeyUsage(boolean[] keyUsage) {
         this.keyUsage = keyUsage;
-    }
-
-    @Deprecated
-    public int getIntKeyUsage() {
-        int iku = 0;
-        if (keyUsage != null) {
-            for (int i = 0; i < keyUsage.length; i++) {
-                if (keyUsage[i]) {
-                    iku = iku | X509Constants.keyUsageInt[i];
-                }
-            }
-        }
-        return iku;
     }
 
     /**
@@ -755,12 +736,12 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     }
 
     public boolean isAcceptChildAC() {
-        return isContainsPrivateKey() && (CertificateUtils.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN));
+        return isContainsPrivateKey() && (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN));
     }
 
     public CertificateType getType() {
         if (isContainsPrivateKey()) {
-            if (CertificateUtils.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN))
+            if (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN))
                 return CertificateType.AC;
             return CertificateType.STANDARD;
         }

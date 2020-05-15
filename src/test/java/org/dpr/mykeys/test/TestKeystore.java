@@ -11,6 +11,7 @@ import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
+import org.dpr.mykeys.app.keystore.repository.RepositoryException;
 import org.dpr.mykeys.app.utils.ProviderUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -88,7 +89,7 @@ public class TestKeystore {
     }
 
     @Test
-    public void change_password_works_ok() throws IOException {
+    public void change_password_works_ok() throws IOException, RepositoryException {
         boolean isAC = false;
         Path source = Paths.get("target/test-classes/data/empty.jks");
         Path target = Paths.get("target/test-classes/data/empty_work.jks");
@@ -100,11 +101,15 @@ public class TestKeystore {
                 StoreModel.CERTSTORE, StoreFormat.JKS);
         ksInfo.setPassword("111".toCharArray());
         try {
-            service.changePassword(ksInfo, "bbb".toCharArray());
+            boolean changed = service.changePassword(ksInfo, "bbb".toCharArray());
+            assertTrue(changed);
         } catch (TamperedWithException | KeyToolsException | ServiceException e) {
             e.printStackTrace();
             fail();
         }
+
+        MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+        mkKeystore.load(fileName, "bbb".toCharArray() );
     }
 
     @Test
@@ -114,9 +119,10 @@ public class TestKeystore {
 
 
         try {
-            KeyStore ks = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray()).getKeystore();
-            service.saveKeyStore(ks, filename, "111".toCharArray());
-        } catch (ServiceException | KeyToolsException e) {
+            MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+            MKKeystoreValue ksInfo = mkKeystore.load(filename, "111".toCharArray() );
+            mkKeystore.save(ksInfo, MkKeystore.SAVE_OPTION.REPLACE);
+        } catch (RepositoryException | IOException e) {
             e.printStackTrace();
             fail();
         }
@@ -132,15 +138,19 @@ public class TestKeystore {
 
         delete(target);
 
-        KeyStoreValue ki = null;
+        MKKeystoreValue ki = null;
         KeystoreBuilder ksBuilder;
         KeyStoreHelper service = new KeyStoreHelper();
 
         try {
-            ksBuilder = new KeystoreBuilder(StoreFormat.JKS);
+            MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+            ki = mkKeystore.create(filename, "111".toCharArray());
+            //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+            CertificateValue val = createCert();
+            val.setPassword(pwd);
+            //ki.setPassword(pwd);
 
-            ksBuilder.create(filename, "111".toCharArray());
-            ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+            service.addCertToKeyStore((KeyStoreValue) ki, val, "111".toCharArray(), null);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -148,11 +158,7 @@ public class TestKeystore {
         }
 
 
-        CertificateValue val = createCert();
-        val.setPassword(pwd);
-        //ki.setPassword(pwd);
 
-        service.addCertToKeyStore(ki, val, null, null);
     }
 
     private void delete(Path target) {
@@ -171,18 +177,11 @@ public class TestKeystore {
         String filename = "target/test-classes/data/test-create_create_ks.jks";
         Path target = Paths.get(filename);
         delete(target);
-        KeystoreBuilder ksBuilder = null;
+
 
         try {
-            ksBuilder = new KeystoreBuilder(StoreFormat.JKS);
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-            fail();
-        }
-
-        try {
-            ksBuilder.create(filename, "111".toCharArray());
-            service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+            MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+            mkKeystore.create(filename, "111".toCharArray());
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -208,8 +207,8 @@ public class TestKeystore {
         }
 
         try {
-            ksBuilder.create(filename, "111".toCharArray());
-            service.loadKeyStore(filename, StoreFormat.PKCS12, "111".toCharArray());
+            MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.PKCS12);
+            mkKeystore.create(filename, "111".toCharArray());
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -296,8 +295,10 @@ public class TestKeystore {
         try {
             List<CertificateValue> certs = service.getCertificates();
             for (CertificateValue cert : certs) {
-                if (cert.getPublicKey().equals(cv.getPublicKey()))
+                if (cert.getPublicKey().equals(cv.getPublicKey())) {
                     found = true;
+                    break;
+                }
             }
             assertTrue(found);
         } catch (ServiceException e) {
@@ -306,12 +307,12 @@ public class TestKeystore {
     }
 
     @Test
-    public void importPem() throws ServiceException, KeyStoreException {
+    public void importPem() throws ServiceException, KeyStoreException, IOException, RepositoryException {
 
         char[] pwd = "111".toCharArray();
         String filename = "target/test-classes/data/my.jks";
         String filenamePem = "target/test-classes/data/pem/3cdeb3d0.pem";
-        KeyStoreValue ki = null;
+        MKKeystoreValue ki = null;
 
         MkKeystore mks = MkKeystore.getInstance(StoreFormat.PEM);
         KeyStoreValue ksv = new KeyStoreValue(filenamePem, StoreFormat.PEM);
@@ -322,16 +323,16 @@ public class TestKeystore {
             e.printStackTrace();
             fail();
         }
-        KeyStoreHelper service = new KeyStoreHelper(ki);
-        service.importX509CertToJks(null, ksv, null);
-        ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
-        Enumeration<String> enumKs = ki.getKeystore().aliases();
-        int size = Collections.list(enumKs).size();
-        assertTrue(size == 1);
+        KeyStoreHelper service = new KeyStoreHelper((KeyStoreValue) ki);
+        service.importX509CertToJks(null, (KeyStoreValue) ki, ksv, "111".toCharArray(), null);
+        //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+        MkKeystore jks = MkKeystore.getInstance(StoreFormat.JKS);
+        MKKeystoreValue reloaded = jks.load(filename, pwd);
+        assertEquals(1, reloaded.getCertificates().size());
     }
 
     @Test
-    public void getCertsPem() throws ServiceException {
+    public void getCertsPem() throws RepositoryException {
 
 
         String filenamePem = "target/test-classes/data/pem/3cdeb3d0.pem";
@@ -345,7 +346,7 @@ public class TestKeystore {
     }
 
     @Test
-    public void getCertsDer() throws ServiceException {
+    public void getCertsDer() throws RepositoryException {
 
 
         String filename = "target/test-classes/data/der/3cdeb3d0x.der";
@@ -358,19 +359,13 @@ public class TestKeystore {
 
     }
 
-    private KeyStoreValue emptyKeystore(String filename, char[] pwd) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, ServiceException {
+    private MKKeystoreValue emptyKeystore(String filename, char[] pwd) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, ServiceException, RepositoryException {
         Path target = Paths.get(filename);
 
         delete(target);
 
-        KeyStoreValue ki = null;
-        KeystoreBuilder ksBuilder;
-        KeyStoreHelper service = new KeyStoreHelper();
-
-        ksBuilder = new KeystoreBuilder(StoreFormat.JKS);
-
-        ksBuilder.create(filename, "111".toCharArray());
-        return service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+        MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+        return mkKeystore.create(filename, "111".toCharArray());
 
     }
 }

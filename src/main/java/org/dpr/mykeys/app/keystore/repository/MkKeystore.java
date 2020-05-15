@@ -33,8 +33,10 @@ public interface MkKeystore {
 
     MKKeystoreValue create(String name, char[] password)  throws RepositoryException, IOException;
 
+    MKKeystoreValue load(String name, char[] password)  throws RepositoryException, IOException;
+
     void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificatesInfo) throws
-            ServiceException;
+            RepositoryException;
 
     void savePrivateKey(PrivateKey privateKey, String fName, char[] pass)
             throws ServiceException;
@@ -44,15 +46,16 @@ public interface MkKeystore {
 
     void saveCertificates(KeyStoreValue ksValue, List<CertificateValue> certInfos);
 
-    void save(KeyStoreValue ksValue) throws RepositoryException;
+    void save(MKKeystoreValue ksValue) throws RepositoryException;
 
-    //load ?
-    List<CertificateValue> getCertificates(KeyStoreValue ksValue)
-            throws ServiceException;
+    List<CertificateValue> getCertificates(MKKeystoreValue ksValue)
+            throws RepositoryException;
 
-    void addCert(KeyStoreValue ki, CertificateValue certificate) throws ServiceException;
+    void addCert(KeyStoreValue ki, CertificateValue certificate) throws  RepositoryException;
 
-    void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException;
+    void addCertificates(KeyStoreValue ki, List<CertificateValue> certificates) throws  RepositoryException;
+
+    void save(MKKeystoreValue ksValue, SAVE_OPTION option) throws RepositoryException;
 
     void saveCSR(byte[] b, File f, SAVE_OPTION option) throws ServiceException;
 

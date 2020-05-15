@@ -39,7 +39,7 @@ public class SSLCertificateExtractor {
 
 
     private static final Log log = LogFactory.getLog(SSLCertificateExtractor.class);
-    private String url;
+    private final String url;
     private String connectx;
     private String verifyCert;
     private Principal lastIssuer;
@@ -47,7 +47,7 @@ public class SSLCertificateExtractor {
     private X509Certificate lastCert;
     private X509Certificate rootCert;
     private X509Certificate certToVerify;
-    private List<X509Certificate> certificateChain = new ArrayList<>();
+    private final List<X509Certificate> certificateChain = new ArrayList<>();
     private int certsSent;
 
     public SSLCertificateExtractor(String url) {
@@ -323,7 +323,7 @@ public class SSLCertificateExtractor {
         Security.setProperty("ocsp.enable", "true");
         System.setProperty("com.sun.net.ssl.checkRevocation", "true");
         System.setProperty("com.sun.security.enableCRLDP", "true");
-        CertPath certPath = certFactory.generateCertPath( (List) certificateChain );
+        CertPath certPath = certFactory.generateCertPath(certificateChain);
         CertPathValidator validator = CertPathValidator.getInstance( "PKIX" );
         CertPathValidatorResult result = validator.validate( certPath, params );
         System.out.println("Chain validated !");

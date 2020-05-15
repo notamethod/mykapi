@@ -36,10 +36,10 @@ class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
     }
 
 
-    public List<CertificateValue> getCertificates(KeyStoreValue ksValue)
-            throws ServiceException {
+    public List<CertificateValue> getCertificates(MKKeystoreValue ksValue)
+            throws RepositoryException {
         if (ksValue.getCertificates() != null && !ksValue.getCertificates().isEmpty())
-            return ksValue.getChildList();
+            return ksValue.getCertificates();
         else {
             List<CertificateValue> certs = new ArrayList<>();
             try (BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream(ksValue.getPath())))) {
@@ -56,9 +56,9 @@ class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
                     certs.add(certificate);
                 }
             } catch (GeneralSecurityException | IOException e) {
-                throw new ServiceException(e);
+                throw new RepositoryException(e);
             }
-            ksValue.setCertificates(certs);
+            //ksValue.setCertificates(certs);
             return certs;
         }
     }
@@ -69,7 +69,7 @@ class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(MKKeystoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
         File f = new File(ksValue.getPath());
         if (f.exists() && option.equals(SAVE_OPTION.NONE)) {
             throw new EntityAlreadyExistsException("File already exists " + f.getAbsolutePath());
@@ -149,7 +149,7 @@ class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
                 for (String line: datas){
                     osw.println(line);
                 }
-                osw.print(pemType.End());
+                osw.println(pemType.End());
             }
         osw.close();
     }

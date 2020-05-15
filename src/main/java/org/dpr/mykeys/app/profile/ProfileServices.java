@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.ChildInfo;
+import org.dpr.mykeys.app.KeyUsages;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 
 
@@ -83,7 +84,7 @@ public class ProfileServices
             p.setProperty(entry.getKey(), (String) entry.getValue());
         }
 
-        p.setProperty("&keyUsage", String.valueOf(certInfo.getIntKeyUsage()));
+        p.setProperty("&keyUsage", String.valueOf(KeyUsages.toInt(certInfo.getKeyUsage())));
         //noinspection ImplicitArrayToString
         p.setProperty("&keyUsage2", String.valueOf(certInfo.getKeyUsage()));
         p.store(new FileOutputStream(f), "");

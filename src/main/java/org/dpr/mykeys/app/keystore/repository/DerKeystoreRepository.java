@@ -51,9 +51,9 @@ class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements 
     }
 
     @Override
-    public void save(KeyStoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
+    public void save(MKKeystoreValue ksValue, SAVE_OPTION option) throws RepositoryException {
 
-        File file = new File(ksValue.getPath() + ".der");
+        File file = new File(ksValue.getPath());
         if (file.exists() && option.equals(SAVE_OPTION.NONE)) {
             throw new RepositoryException("File already exists " + file.getAbsolutePath());
         }
@@ -71,9 +71,9 @@ class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements 
 
 
     @Override
-    public List<CertificateValue> getCertificates(KeyStoreValue ksValue) {
+    public List<CertificateValue> getCertificates(MKKeystoreValue ksValue) {
         if (ksValue.getCertificates() != null && !ksValue.getCertificates().isEmpty())
-            return ksValue.getChildList();
+            return ksValue.getCertificates();
 
         List<CertificateValue> certsRetour = new ArrayList<>();
         //  InputStream is = null;
@@ -103,6 +103,8 @@ class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements 
     public void addCert(KeyStoreValue ki, CertificateValue certificate) {
 
     }
+
+
 
 
 }

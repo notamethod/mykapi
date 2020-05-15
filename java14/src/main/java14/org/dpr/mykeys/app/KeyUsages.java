@@ -1,9 +1,11 @@
 package org.dpr.mykeys.app;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.dpr.mykeys.app.X509Constants;
+import org.dpr.mykeys.app.utils.KeyUsageEnum;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class KeyUsages {
     public static final String[] keyUsageKeys = new String[]{"digitalSignature", "nonRepudiation", "keyEncipherment",
@@ -28,6 +30,10 @@ public class KeyUsages {
             "encipherOnly",KeyUsage.encipherOnly,
             "decipherOnly",KeyUsage.decipherOnly);
 
+    static Map<Integer, String> invertedMap =
+            map.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     public static int toInt(boolean[] keyUsage){
         System.out.println("java14");
@@ -49,6 +55,32 @@ public class KeyUsages {
             iku = iku | intValue;
         }
         return iku;
+    }
+
+    public static String toString(int value){
+        return invertedMap.get(value);
+    }
+
+    public static boolean isKeyUsage(boolean[] keyUsage, int i) {
+        return i < keyUsage.length && keyUsage[i];
+
+    }
+
+    public static boolean[] keyUsageFromInt(int keyUsage) {
+        String value = "";
+        boolean[] booloKu = new boolean[]{false, false, false, false, false, false, false, false, false};
+        boolean isKeyUsage = false;
+
+        for (KeyUsageEnum usage : KeyUsageEnum.values()) {
+            if ((keyUsage & usage.getIntValue()) == usage.getIntValue()) {
+                for (int i = 0; i < X509Constants.keyUsageInt.length; i++) {
+                    if (X509Constants.keyUsageInt[i] == usage.getIntValue()) {
+                        booloKu[i] = true;
+                    }
+                }
+            }
+        }
+        return booloKu;
 
     }
 }

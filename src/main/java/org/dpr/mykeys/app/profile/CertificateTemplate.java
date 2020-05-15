@@ -14,14 +14,14 @@ import org.jetbrains.annotations.NotNull;
 
 public class CertificateTemplate implements ChildInfo<CertificateTemplate> {
 
-    private OrderedProperties p;
+    private final OrderedProperties p;
 
     public OrderedProperties getProperties() {
         return p;
     }
 
     private String name;
-    private Path path;
+    private final Path path;
     private String description;
 
 
@@ -60,7 +60,7 @@ public class CertificateTemplate implements ChildInfo<CertificateTemplate> {
     public int getIntValue(String string) {
         if (string != null) {
             try {
-                return Integer.valueOf(getValue(string));
+                return Integer.parseInt(getValue(string));
             } catch (NumberFormatException e) {
                 //not a number
 

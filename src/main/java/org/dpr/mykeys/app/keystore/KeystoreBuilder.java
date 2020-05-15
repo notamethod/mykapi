@@ -23,7 +23,7 @@ public class KeystoreBuilder {
 
 
     public static final Log log = LogFactory.getLog(KeystoreBuilder.class);
-    private KeyStore keystore;
+    private final KeyStore keystore;
 
     public KeystoreBuilder(KeyStore keystore) {
         super();
@@ -45,7 +45,9 @@ public class KeystoreBuilder {
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      * @throws Exception
+     *  @Deprecated replace with MKkeystore create
      */
+    @Deprecated
     public KeystoreBuilder create(String name, char[] password) throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
         Path path = Paths.get(name);
         if (Files.exists(path)) {

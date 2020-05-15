@@ -5,11 +5,9 @@ import org.dpr.mykeys.app.ServiceException;
 
 public class TamperedWithException extends Exception {
 
-	public TamperedWithException(KeyToolsException e) {
+	public TamperedWithException(Exception e) {
 		super (e);
 	}
 
-    public TamperedWithException(ServiceException e) {
-        super(e);
-    }
+
 }

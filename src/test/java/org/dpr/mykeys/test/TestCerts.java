@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.utils.TimeStampManager;
 import org.dpr.mykeys.app.certificate.CertificateValue;
 import org.dpr.mykeys.app.keystore.*;
@@ -97,7 +98,7 @@ public class TestCerts {
             KeyStoreValue ksIn = new KeyStoreValue(new File(pathCert),
                     StoreFormat.PKCS12, "aaa".toCharArray());
             KeyStoreHelper kserv = new KeyStoreHelper(ksInfo);
-            kserv.importX509CertToJks(alias, ksIn, "aaa".toCharArray());
+            kserv.importX509CertToJks(alias, ksInfo, ksIn,"111".toCharArray(), "aaa".toCharArray());
 
             KeyStoreHelper kservRet = new KeyStoreHelper(ksInfo);
             List<?> lst = kservRet.getChildList();
@@ -141,83 +142,25 @@ public class TestCerts {
         }
         Path resourceDirectory = Paths.get("src/test/resources/data/test01.jks");
         fileName = resourceDirectory.toAbsolutePath().toString();
-        KeyStoreValue ksInfo = new KeyStoreValue("aa", fileName,
-                StoreModel.CERTSTORE, StoreFormat.JKS);
-        KeyStoreHelper ksBuilder = new KeyStoreHelper(ksInfo);
-        ksInfo.setPassword("1234".toCharArray());
+        MKKeystoreValue ksInfo = null;
+//        KeyStoreValue ksInfo = new KeyStoreValue("aa", fileName,
+//                StoreModel.CERTSTORE, StoreFormat.JKS);
+        MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
         try {
-            ks = ksBuilder.loadKeyStore(ksInfo.getPath(), ksInfo.getStoreFormat(),
-                    ksInfo.getPassword()).getKeystore();
-
+            ksInfo = mkKeystore.load(fileName, "1234".toCharArray() );
         } catch (Exception e1) {
 
             log.error(e1);
             fail();
         }
-
-        Enumeration<String> enumKs = null;
-        try {
-            enumKs = ks.aliases();
-        } catch (KeyStoreException e) {
-            log.error(e);
-            fail();
-        }
-        if (enumKs != null && enumKs.hasMoreElements()) {
-
-            while (enumKs.hasMoreElements()) {
-                String alias = enumKs.nextElement();
-                if (log.isDebugEnabled()) {
-                    log.debug("alias " + alias);
-                }
-                //
-                CertificateValue certInfo = fillCertInfo(ksInfo, ks, alias);
-
-            }
-        }
-
+        assertEquals(1, ksInfo.getCertificates().size());
     }
 
     @Test
     public void TimeStamp() throws ServiceException {
         Security.addProvider(new BouncyCastleProvider());
 
-        KeyStore ks = null;
-        String fileName = null;
-        Path resourceDirectory = Paths.get("src/test/resources/data/test01.jks");
-        fileName = resourceDirectory.toAbsolutePath().toString();
-        KeyStoreValue ksInfo = new KeyStoreValue("aa", fileName,
-                StoreModel.CERTSTORE, StoreFormat.JKS);
-        ksInfo.setPassword("1234".toCharArray());
-        KeyStoreHelper ksHelper = new KeyStoreHelper(ksInfo);
-        try {
-            ks = ksHelper.loadKeyStore(ksInfo.getPath(), ksInfo.getStoreFormat(),
-                    ksInfo.getPassword()).getKeystore();
 
-        } catch (Exception e1) {
-
-            log.error(e1);
-            fail();
-
-        }
-        CertificateValue certInfo = null;
-        Enumeration<String> enumKs = null;
-        try {
-            enumKs = ks.aliases();
-        } catch (KeyStoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (enumKs != null && enumKs.hasMoreElements()) {
-
-            while (enumKs.hasMoreElements()) {
-                String alias = enumKs.nextElement();
-                if (log.isDebugEnabled()) {
-                    log.debug(alias);
-                }
-                //
-                certInfo = fillCertInfo(ksInfo, ks, alias);
-            }
-        }
         try {
             TimeStampToken tsp = TimeStampManager.getTimeStampToken(4);
             log.trace(tsp);

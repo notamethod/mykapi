@@ -11,67 +11,49 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyStoreValue implements NodeInfo, MKKeystoreValue {
+public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKeystoreValue {
 
     public static final Log log = LogFactory.getLog(KeyStoreValue.class);
     private String name;
-    private String path;
+
     private boolean isOpen = false;
     private StoreModel storeModel = StoreModel.CERTSTORE;
-    private StoreFormat storeFormat;
     private StoreLocationType storeType = StoreLocationType.EXTERNAL;
     //TODO
-    private boolean isTemp = false;
+    private final boolean isTemp = false;
     //TODO
-    private boolean isProtected = false;
+    private final boolean isProtected = false;
     //TODO
     private KeyStore keystore;
-    private List<CertificateValue> certificates = new ArrayList<>();
+
     private char[] password;
 
-    public KeyStoreValue(String name, String path, StoreModel storeModel,
+    public KeyStoreValue(String path, StoreFormat format) {
+        super(path, format);
+    }
+    public KeyStoreValue(String name, String filePath, StoreModel storeModel,
                          StoreFormat storeFormat) {
+        super(filePath, StoreFormat.JKS);
         this.name = FilenameUtils.getName(name);
-        this.path = path;
         this.storeModel = storeModel;
-        this.storeFormat = storeFormat;
     }
 
-    /**
-     * Defaut constructor for keystore of type JKS
-     *
-     * @param path full keystore's pathname
-     */
-    private KeyStoreValue(String path) {
-        this.name = FilenameUtils.getName(path);
-        this.path = path;
-        this.storeModel = StoreModel.CERTSTORE;
-        this.storeFormat = StoreFormat.JKS;
-    }
-
-    public KeyStoreValue(String name, String path, StoreModel storeModel,
+    public KeyStoreValue(String name, String filePath, StoreModel storeModel,
                          StoreFormat storeFormat, StoreLocationType storeType) {
+
+        super(filePath, storeFormat);
         this.name = FilenameUtils.getName(name);
-        this.path = path;
         this.storeModel = storeModel;
-        this.storeFormat = storeFormat;
         this.storeType = storeType;
     }
 
     public KeyStoreValue(File fic, StoreFormat storeFormat, char[] cs) {
+        super("", storeFormat);
         this.name = FilenameUtils.getName(fic.getPath());
         this.path = fic.getPath();
         this.storeFormat = storeFormat;
         password = cs;
     }
-
-    public KeyStoreValue(String fic, StoreFormat storeFormat) {
-
-        this.path = new File(fic).getPath();
-        this.storeFormat = storeFormat;
-
-    }
-
 
     @Override
     public boolean isProtected() {
@@ -115,20 +97,6 @@ public class KeyStoreValue implements NodeInfo, MKKeystoreValue {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @return the path
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * @param path the path to set
-     */
-    public void setPath(String path) {
-        this.path = path;
     }
 
     /**
@@ -224,19 +192,12 @@ public class KeyStoreValue implements NodeInfo, MKKeystoreValue {
 
     @Override
     public List<CertificateValue> getChildList() {
-        return certificates;
+        return getCertificates();
     }
 
     public void setChildList(List<CertificateValue> certificates) {
-        this.certificates = certificates;
+        setCertificates(certificates);
     }
 
-    public List<CertificateValue> getCertificates() {
-        return certificates;
-    }
 
-    public void setCertificates(List<CertificateValue> certificates) {
-        this.certificates.clear();
-        this.certificates.addAll(certificates);
-    }
 }

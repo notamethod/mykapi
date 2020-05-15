@@ -24,9 +24,9 @@ public class ProfilStoreInfo implements NodeInfo {
 
 	private StoreLocationType storeType = StoreLocationType.INTERNAL;
 	// TODO
-	private boolean isTemp = false;
+	private final boolean isTemp = false;
 	// TODO
-	private boolean isProtected = false;
+	private final boolean isProtected = false;
 
 	private char[] password;
 
