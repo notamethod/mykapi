@@ -83,7 +83,7 @@ class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
             saveBytes(encodedList, fout, PEMType.CERTIFICATE);
         } catch (Exception e) {
 
-            throw new RepositoryException("Export de la clé publique impossible:", e);
+            throw new RepositoryException("Can't save file:", e);
         }
     }
 

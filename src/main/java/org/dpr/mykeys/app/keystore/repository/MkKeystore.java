@@ -9,10 +9,7 @@ import org.dpr.mykeys.app.keystore.StoreFormat;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateException;
 import java.util.List;
 
 public interface MkKeystore {

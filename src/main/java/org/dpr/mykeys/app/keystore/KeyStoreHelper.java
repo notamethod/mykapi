@@ -455,8 +455,9 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         CertificateValue certInfo;
         try {
             KeyStore ks = load(store);
-
             Certificate certificate = ks.getCertificate(alias);
+            if (certificate == null)
+                return null;
             //mk3 is a special CA: let it different for now
             if (certificate instanceof X509Certificate) {
                 String sn0 = X509Util.toHexString(((X509Certificate) certificate).getSerialNumber(), " ", true);
@@ -584,7 +585,6 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
 
     public boolean export(List<CertificateValue> certInfos, String fName, StoreFormat format, char[] pwd, MkKeystore.SAVE_OPTION option) throws KeyToolsException {
         /* save the public key in a file */
-
         boolean exportToNewFile = true;
         try {
             KeyStoreValue ksv = new KeyStoreValue(fName, format);
@@ -596,41 +596,17 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
 
         } catch (EntityAlreadyExistsException e) {
 
-            exportToNewFile = false;
+            log.warn(e);
+            return false;
 
         } catch (Exception e) {
 
-            throw new KeyToolsException("Export de la clé publique impossible:", e);
+            throw new KeyToolsException("Can't save file:", e);
         }
         return exportToNewFile;
     }
 
-//    public boolean export(byte[] b, File file, StoreFormat format SAVE_OPTION option) throws KeyToolsException {
-//        /* save the public key in a file */
-//
-//        boolean exportToNewFile = true;
-//        try {
-//            KeyStoreValue ksv = new KeyStoreValue(fName, format);
-//            if (pwd != null)
-//                ksv.setPassword(pwd);
-//            ksv.setCertificates(certInfos);
-//            MkKeystore mks = MkKeystore.getInstance(format);
-//            mks.save(ksv, option);
-//
-//        } catch (EntityAlreadyExistsException e) {
-//
-//            exportToNewFile = false;
-//
-//        } catch (Exception e) {
-//
-//            throw new KeyToolsException("Export de la clé publique impossible:", e);
-//        }
-//        return exportToNewFile;
-//    }
-
     private List<CertificateValue> loadX509Certs(String fileName) {
-
-        // NodeInfo nInfo = new KeyStoreValue(new File(fileName));
         List<CertificateValue> certsRetour = new ArrayList<>();
 
 

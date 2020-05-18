@@ -131,8 +131,8 @@ public abstract class AbstractJavaKeystoreRepository extends KeystoreRepository 
                 create(ksValue.getPath(), ksValue.getPassword());
             }
 
-        } catch (Exception e) {
-            throw new RepositoryException("creating fail", e);
+        } catch (IOException e) {
+            throw new RepositoryException("writing file failed", e);
         }
 
         try {

@@ -191,7 +191,6 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
     public CertificateValue createCertificateAuth(String id, char[] charArray, KeyPair keypair) throws ServiceException {
 
-        // X500Name owner = new X500Name("CN=" + fqdn);
         X500Name subject = new X500Name("CN=" + id);
         BigInteger serial = new BigInteger(32, new SecureRandom());
         Date from = new Date();
@@ -209,6 +208,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
             cert.verify(keypair.getPublic());
             value = new CertificateValue(id, cert);
+            log.info("certificate " + id + " generated");
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new ServiceException("create auth error", e);
         }

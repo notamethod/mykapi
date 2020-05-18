@@ -64,7 +64,7 @@ class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements 
                 }
             }
         } catch (Exception e) {
-            throw new RepositoryException("Export de la clé publique impossible:", e);
+            throw new RepositoryException("Can't save file", e);
         }
     }
 

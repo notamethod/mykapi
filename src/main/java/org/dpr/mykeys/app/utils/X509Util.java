@@ -166,10 +166,8 @@ public class X509Util {
         byte[] extVal = certX509.getExtensionValue(Extension.cRLDistributionPoints.getId());
         byte[] extension = certX509.getExtensionValue(Extension.cRLDistributionPoints.toString());
         if (extension == null) {
-            if (log.isWarnEnabled()) {
-                log.warn("Pas de CRLDistributionPoint pour: "
-                        + certX509.getSubjectDN());//
-            }
+            log.info("No CRLDistributionPoint for: "
+                    + certX509.getSubjectDN());//
             return distPointSet;
         }
 
@@ -178,10 +176,8 @@ public class X509Util {
             distPoints = CRLDistPoint.getInstance(X509ExtensionUtil
                     .fromExtensionValue(extension));
         } catch (Exception e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Extension de CRLDistributionPoint non reconnue pour: "
-                        + certX509.getSubjectDN());//
-            }
+            log.info("CRLDistributionPoint Extension unknown for: "
+                    + certX509.getSubjectDN());//
             if (log.isDebugEnabled()) {
                 log.debug(e);
             }
