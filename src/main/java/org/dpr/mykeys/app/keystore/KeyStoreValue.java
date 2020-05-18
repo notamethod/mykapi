@@ -33,7 +33,7 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
     }
     public KeyStoreValue(String name, String filePath, StoreModel storeModel,
                          StoreFormat storeFormat) {
-        super(filePath, StoreFormat.JKS);
+        super(filePath, storeFormat);
         this.name = FilenameUtils.getName(name);
         this.storeModel = storeModel;
     }
