@@ -11,7 +11,7 @@ import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.utils.X509Util;
 
 import java.io.*;
@@ -161,7 +161,7 @@ public class CRLManager {
 		return crl;
 	}
 
-	public X509CRL generateCrl(CertificateValue certSign, Date thisDate, Date nextDate, Collection filter) throws CRLException, OperatorCreationException {
+	public X509CRL generateCrl(Certificate certSign, Date thisDate, Date nextDate, Collection filter) throws CRLException, OperatorCreationException {
 		X509Certificate certificate = certSign.getCertificate();
 		PrivateKey privateKey = (certSign.getPrivateKey());
 
@@ -326,7 +326,7 @@ public class CRLManager {
      * @throws IllegalStateException
      * @throws CRLException
      */
-    public X509CRL generateCrl(CertificateValue certSign, CrlValue crlValue, List<String> serialList)
+    public X509CRL generateCrl(Certificate certSign, CrlValue crlValue, List<String> serialList)
             throws
             CRLException, IllegalStateException,
             OperatorCreationException {

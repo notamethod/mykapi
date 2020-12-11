@@ -7,12 +7,11 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.utils.TimeStampManager;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -21,12 +20,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.Security;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,14 +34,14 @@ public class TestCerts {
 
     String emptyKeystore;
 
-    private static CertificateValue fillCertInfo(KeyStoreValue ksInfo, KeyStore ks, String alias) throws ServiceException {
+    private static Certificate fillCertInfo(KeyStoreValue ksInfo, KeyStore ks, String alias) throws ServiceException {
 
-        CertificateValue certInfo;
+        Certificate certInfo;
         try {
-            Certificate certificate = ks.getCertificate(alias);
-            Certificate[] certs = ks.getCertificateChain(alias);
+            java.security.cert.Certificate certificate = ks.getCertificate(alias);
+            java.security.cert.Certificate[] certs = ks.getCertificateChain(alias);
 
-            certInfo = new CertificateValue(alias, (X509Certificate) certificate);
+            certInfo = new Certificate(alias, (X509Certificate) certificate);
             if (ks.isKeyEntry(alias)) {
                 certInfo.setContainsPrivateKey(true);
 
@@ -60,7 +55,7 @@ public class TestCerts {
                     log.debug(message);
                 // return null;
             } else {
-                for (Certificate chainCert : certs) {
+                for (java.security.cert.Certificate chainCert : certs) {
                     bf.append(chainCert.toString());
                 }
                 certInfo.setChaineStringValue(bf.toString());
@@ -83,36 +78,7 @@ public class TestCerts {
         emptyKeystore = target.toAbsolutePath().toString();
     }
 
-    @Test
-    public void ImportX509() {
 
-        try {
-            String typeCert = null;
-
-            String alias = "aaa";
-            String pathCert = "target/test-classes/data/aaa.p12";
-            KeyStoreValue ksInfo = new KeyStoreValue("aa", emptyKeystore,
-                    StoreModel.CERTSTORE, StoreFormat.JKS);
-            ksInfo.setPassword("111".toCharArray());
-            File f = new File(pathCert);
-            KeyStoreValue ksIn = new KeyStoreValue(new File(pathCert),
-                    StoreFormat.PKCS12, "aaa".toCharArray());
-            KeyStoreHelper kserv = new KeyStoreHelper(ksInfo);
-            kserv.importX509CertToJks(alias, ksInfo, ksIn,"111".toCharArray(), "aaa".toCharArray());
-
-            KeyStoreHelper kservRet = new KeyStoreHelper(ksInfo);
-            List<?> lst = kservRet.getChildList();
-            assertEquals(1, lst.size());
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
-
-
-        }
-
-    }
 
     @Test
     public void loadKS() throws ServiceException {

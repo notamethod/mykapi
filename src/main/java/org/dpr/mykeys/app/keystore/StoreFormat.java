@@ -3,7 +3,7 @@ package org.dpr.mykeys.app.keystore;
 import org.dpr.mykeys.app.PkiTools.TypeObject;
 
 public enum StoreFormat {
-    JKS(".jks"), PKCS12(".p12"), PEM(".pem"), DER(".der"), UNKNOWN(""), PROPERTIES("");
+    JKS(".jks"), PKCS12(".p12"), PEM(".crt"), DER(".cer"), UNKNOWN(""), PROPERTIES("");
 
     private final String extension;
 

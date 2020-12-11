@@ -1,7 +1,7 @@
 package org.dpr.mykeys.app.keystore.repository;
 
 import org.dpr.mykeys.app.ServiceException;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
@@ -32,7 +32,7 @@ public interface MkKeystore {
 
     MKKeystoreValue load(String name, char[] password)  throws RepositoryException, IOException;
 
-    void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificatesInfo) throws
+    void removeCertificates(KeyStoreValue ksValue, List<Certificate> certificatesInfo) throws
             RepositoryException;
 
     void savePrivateKey(PrivateKey privateKey, String fName, char[] pass)
@@ -41,22 +41,27 @@ public interface MkKeystore {
     void exportPrivateKey(PrivateKey privateKey, OutputStream os, char[] pass)
             throws ServiceException;
 
-    void saveCertificates(KeyStoreValue ksValue, List<CertificateValue> certInfos);
+    void saveCertificates(KeyStoreValue ksValue, List<Certificate> certInfos);
 
     void save(MKKeystoreValue ksValue) throws RepositoryException;
 
-    List<CertificateValue> getCertificates(MKKeystoreValue ksValue)
+    void update(MKKeystoreValue ksValue) throws RepositoryException;
+
+    List<Certificate> getCertificates(MKKeystoreValue ksValue)
             throws RepositoryException;
 
-    void addCert(KeyStoreValue ki, CertificateValue certificate) throws  RepositoryException;
+    void addCert(KeyStoreValue ki, Certificate certificate) throws  RepositoryException;
 
-    void addCertificates(KeyStoreValue ki, List<CertificateValue> certificates) throws  RepositoryException;
+    void addCertificates(MKKeystoreValue ki, List<Certificate> certificates) throws  RepositoryException;
 
     void save(MKKeystoreValue ksValue, SAVE_OPTION option) throws RepositoryException;
 
     void saveCSR(byte[] b, File f, SAVE_OPTION option) throws ServiceException;
 
     void saveCSR(byte[] b, OutputStream os, SAVE_OPTION option) throws ServiceException;
+
+     PrivateKey getPrivateKey(MKKeystoreValue mksValue, String alias, char[] password) throws
+            RepositoryException;
 
     enum SAVE_OPTION {
         REPLACE, ADD, NONE

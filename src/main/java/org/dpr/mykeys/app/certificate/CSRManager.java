@@ -50,10 +50,10 @@ public class CSRManager {
      * @throws ServiceException
      * @throws IOException
      */
-    public CertificateValue generateCertificate(InputStream is, CertificateValue issuer) throws ServiceException, IOException {
+    public Certificate generateCertificate(InputStream is, Certificate issuer) throws ServiceException, IOException {
 
         X509Certificate[] certificates = null;
-        CertificateValue cert = null;
+        Certificate cert = null;
         try {
 
             Object pemcsr;
@@ -78,7 +78,7 @@ public class CSRManager {
             if (certificate != null) {
                 log.info("certificate " + certificate.getSubjectDN().getName() + " created !");
             }
-            cert = new CertificateValue(certificates);
+            cert = new Certificate(certificates);
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new ServiceException("error on certificate generation fro csr file " + is, e);
         }

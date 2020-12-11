@@ -252,7 +252,7 @@ public class CertificateBuilder implements CertificateGeneratorExtensions {
 
     }
 
-    public CertificateValue createCertificateAuth(String id, char[] charArray, KeyPair keypair) throws ServiceException {
+    public Certificate createCertificateAuth(String id, char[] charArray, KeyPair keypair) throws ServiceException {
 
         // X500Name owner = new X500Name("CN=" + fqdn);
         X500Name subject = new X500Name("CN=" + id);
@@ -264,14 +264,14 @@ public class CertificateBuilder implements CertificateGeneratorExtensions {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(subject, serial, from, to, subject,
                 keypair.getPublic());
 
-        CertificateValue value = null;
+        Certificate value = null;
         try {
             ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keypair.getPrivate());
             X509CertificateHolder certHolder = builder.build(signer);
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ProviderUtil.provider).getCertificate(certHolder);
 
             cert.verify(keypair.getPublic());
-            value = new CertificateValue(id, cert);
+            value = new Certificate(id, cert);
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new ServiceException("create auth error", e);
         }

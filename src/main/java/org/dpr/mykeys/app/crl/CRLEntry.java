@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.crl;
 
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 
 import java.math.BigInteger;
 import java.security.cert.CRLReason;
@@ -14,7 +14,7 @@ public class CRLEntry {
     private int revocationReason;
     private CRLReason reason;
 
-    public CRLEntry(CertificateValue value, int revocationReason) {
+    public CRLEntry(Certificate value, int revocationReason) {
         serialNumber = value.getCertificate().getSerialNumber();
         subject = value.getSubjectString();
         revocationDate = new Date();

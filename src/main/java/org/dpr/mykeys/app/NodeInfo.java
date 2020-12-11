@@ -3,6 +3,8 @@
  */
 package org.dpr.mykeys.app;
 
+import org.dpr.mykeys.app.certificate.MkCertificate;
+
 import java.util.List;
 
 /**
@@ -52,7 +54,7 @@ public interface NodeInfo {
     void setOpen(boolean isOpen);
 
 
-    List<? extends ChildInfo> getChildList();
+    List<? extends MkCertificate> getChildList();
 
     boolean isProtected();
 

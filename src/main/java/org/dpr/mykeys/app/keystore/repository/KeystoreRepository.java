@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
@@ -16,11 +16,11 @@ public abstract class KeystoreRepository implements MkKeystore {
 
     StoreFormat format;
 
-    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws RepositoryException {
-        List<CertificateValue> certs = getCertificates(ksValue);
-        List<CertificateValue> certsToRemove = new ArrayList<>();
-        for (CertificateValue cert : certs) {
-            for (CertificateValue certificateInfo : certificates) {
+    public void removeCertificates(KeyStoreValue ksValue, List<Certificate> certificates) throws RepositoryException {
+        List<Certificate> certs = getCertificates(ksValue);
+        List<Certificate> certsToRemove = new ArrayList<>();
+        for (Certificate cert : certs) {
+            for (Certificate certificateInfo : certificates) {
                 if (certificateInfo.getName().equals(cert.getName())) {
                     certsToRemove.add(cert);
                 }
@@ -32,6 +32,10 @@ public abstract class KeystoreRepository implements MkKeystore {
 
     public void save(MKKeystoreValue ksValue) throws RepositoryException {
         save(ksValue, MkKeystore.SAVE_OPTION.NONE);
+    }
+
+    public void update(MKKeystoreValue ksValue) throws RepositoryException {
+        save(ksValue, SAVE_OPTION.REPLACE);
     }
 
     @Override

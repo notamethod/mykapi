@@ -2,7 +2,7 @@ package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
@@ -23,7 +23,7 @@ class Pkcs12KeystoreRepository extends AbstractJavaKeystoreRepository {
     }
 
     @Override
-    public void saveCertificates(KeyStoreValue ksValue, List<CertificateValue> certInfos) {
+    public void saveCertificates(KeyStoreValue ksValue, List<Certificate> certInfos) {
 
     }
 

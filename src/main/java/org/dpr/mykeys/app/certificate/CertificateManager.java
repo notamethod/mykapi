@@ -23,7 +23,7 @@ public class CertificateManager {
         super();
     }
 
-    public CertificateValue createLoginCertificate(String id, char[] charArray) throws ServiceException {
+    public Certificate createLoginCertificate(String id, char[] charArray) throws ServiceException {
         CertificateGeneratorStandard certGen = new CertificateGeneratorStandard();
         KeyPair keyPair = generateKeyPair("RSA", 2048);
         return certGen.createCertificateAuth(id, charArray, keyPair);
@@ -32,7 +32,7 @@ public class CertificateManager {
 
 
 
-    public CertificateValue generate(CertificateValue certInfo, CertificateValue inIssuer, CertificateType usage) throws Exception {
+    public Certificate generate(Certificate certInfo, Certificate inIssuer, CertificateType usage) throws Exception {
         CertificateGeneratorStandard certGen = null;
 
         switch (usage) {

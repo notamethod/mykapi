@@ -12,9 +12,10 @@ import org.bouncycastle.asn1.x509.GeneralName;
 
 import org.dpr.mykeys.app.*;
 import org.bouncycastle.jce.X509Principal;
-import org.dpr.mykeys.app.utils.CertificateUtils;
+import org.dpr.mykeys.app.utils.Pair;
 import org.dpr.mykeys.app.utils.PoliciesException;
 import org.dpr.mykeys.app.utils.PoliciesUtil;
+import org.dpr.mykeys.app.utils.X509Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
@@ -22,7 +23,6 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.time.LocalDateTime;
@@ -30,10 +30,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable {
-    private static final Log log = LogFactory.getLog(CertificateValue.class);
+public class Certificate   implements MkCertificate<Certificate>, Cloneable, CryptoObject   {
+    private static final Log log = LogFactory.getLog(Certificate.class);
     private final List<GeneralName> subjectNames = new ArrayList<>();
-    private Certificate[] certificateChain;
+    private java.security.cert.Certificate[] certificateChain;
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private String algoPubKey;
@@ -53,16 +53,27 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
 
     private int keyUsageInt;
     private final Hashtable x509PrincipalMap = new Hashtable();
+    private final List<Pair> subjectList = new ArrayList<>();
+    @Deprecated
     private final Map<String, String> subjectMap = new LinkedHashMap<>();
 
-    public BigInteger getSerialNumber() {
-        return serialNumber;
+    /**
+     *
+     * @return the S/N of the certificate in hexa
+     */
+    public String getSerialNumber() {
+        return X509Util.toHexString(certificate.getSerialNumber(), "", false);
     }
 
+    @Deprecated
     public void setSerialNumber(BigInteger serialNumber) {
         this.serialNumber = serialNumber;
     }
-
+    /**
+     *
+     * @deprecated
+     */
+    @Deprecated
     private BigInteger serialNumber;
 
     private String freeSubject;
@@ -81,29 +92,29 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     private String policyCPS;
     private String policyID;
     private Map<String, String> otherParams;
-    private List<CertificateValue> children;
+    private List<Certificate> children;
 
-    public CertificateValue() {
+    public Certificate() {
         super();
     }
 
-    public CertificateValue(String alias2) {
+    public Certificate(String alias2) {
         this.alias = alias2;
     }
 
-    public CertificateValue(String alias2, X509Certificate cert, char[] charArray) throws GeneralSecurityException {
+    public Certificate(String alias2, X509Certificate cert, char[] charArray) throws GeneralSecurityException {
         this.alias = alias2;
         this.password = charArray;
         init(cert);
     }
 
-    public CertificateValue(String alias2, X509Certificate cert) throws GeneralSecurityException {
+    public Certificate(String alias2, X509Certificate cert) throws GeneralSecurityException {
         this.alias = alias2;
 
         init(cert);
     }
 
-    public CertificateValue(X509Certificate[] certs) throws GeneralSecurityException {
+    public Certificate(X509Certificate[] certs) throws GeneralSecurityException {
 
         init(certs);
     }
@@ -181,7 +192,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
         this.setCertificateChain(certs);
         if (certs != null) {
             StringBuilder bf = new StringBuilder();
-            for (Certificate chainCert : certs) {
+            for (java.security.cert.Certificate chainCert : certs) {
                 bf.append(chainCert.toString());
             }
             setChaineStringValue(bf.toString());
@@ -214,6 +225,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
         X500Name name = new X500Name(certX509.getSubjectX500Principal().getName("RFC2253"));
 
         this.x509NameToMap(name);
+       this.x509NameToList(name);
         this.setKeyUsage(certX509.getKeyUsage());
         this.setNotBefore(certX509.getNotBefore());
         this.setNotAfter(certX509.getNotAfter());
@@ -378,10 +390,10 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
                     nameBuilder.addRDN((ASN1ObjectIdentifier) oidKey, subjectMap.get(key));
                     // i++;
                 } else {
-                    log.error("No OID: " + key);
+                    log.debug("No OID: " + key);
                 }
             } catch (Exception e) {
-                log.error("No OID: " + key);
+                log.debug("No OID: " + key);
             }
 
         }
@@ -411,6 +423,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      *
      * @param name
      */
+
     private void x509NameToMap(X500Name name) {
 
 
@@ -444,17 +457,53 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
         }
 
     }
+    private void x509NameToList(X500Name name) {
 
+
+        ASN1ObjectIdentifier[] v = name.getAttributeTypes();
+
+        //  /** PKCS#9: 1.2.840.113549.1.9.1 */
+        //static final ASN1ObjectIdentifier    pkcs_9_at_emailAddress        = pkcs_9.branch("1").intern();
+
+        for (RDN rdn : name.getRDNs()) {
+            AttributeTypeAndValue[] atrs = rdn.getTypesAndValues();
+            for (AttributeTypeAndValue atr : atrs) {
+
+                String val = atr.getValue().toString();
+
+                //String type = RFC4519Style.INSTANCE.oidToDisplayName(atrs[i].getType());
+                String type = BCStyle.INSTANCE.oidToDisplayName(atr.getType());
+
+                if (log.isDebugEnabled()) {
+                    log.debug(type + ":" + val);
+
+
+                }
+                if (null == type) {
+                    log.error("o.i.d type not found for " + atr.getType());
+
+                } else
+                    subjectList.add(new Pair(type.toUpperCase(), val));
+
+            }
+
+        }
+        Collections.sort(subjectList);
+    }
     /**
      * @return the subjectMap
      */
+    @Deprecated
     public Map<String, String> getSubjectMap() {
         return subjectMap;
     }
-
+    public List<Pair> getSubjectList() {
+        return subjectList;
+    }
     /**
      * @param elementMap the subjectMap to set
      */
+    @Deprecated(/*forRemoval = true*/)
     public void setSubjectMap(Map<String, Object> elementMap) {
         Iterator iter = elementMap.keySet().iterator();
         this.subjectMap.clear();
@@ -467,7 +516,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
         }
 
     }
-
+    @Deprecated
     public void setSubjectMap(String name) {
         this.subjectMap.clear();
         for (String pair : name.split(",")) {
@@ -579,7 +628,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      *
      * @return
      */
-    public Certificate[] getCertificateChain() {
+    public java.security.cert.Certificate[] getCertificateChain() {
 
         return certificateChain;
     }
@@ -591,7 +640,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      *
      * @param certificateChain2
      */
-    public void setCertificateChain(Certificate[] certificateChain2) {
+    public void setCertificateChain(java.security.cert.Certificate[] certificateChain2) {
         certificateChain = certificateChain2;
 
     }
@@ -684,7 +733,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
         return alias;
     }
 
-    public CertificateValue setDnsNames(String... dnsNames) {
+    public Certificate setDnsNames(String... dnsNames) {
         for (String name : dnsNames) {
             subjectNames.add(new GeneralName(GeneralName.dNSName, name));
         }
@@ -697,7 +746,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      * @param ipAddresses
      * @return
      */
-    public CertificateValue setIpAddresses(String... ipAddresses) {
+    public Certificate setIpAddresses(String... ipAddresses) {
         for (String address : ipAddresses) {
             subjectNames.add(new GeneralName(GeneralName.iPAddress, address));
         }
@@ -711,7 +760,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
      * @param dirNames
      * @return
      */
-    public CertificateValue setDirectoryNames(String... dirNames) {
+    public Certificate setDirectoryNames(String... dirNames) {
         for (String name : dirNames) {
             subjectNames.add(new GeneralName(GeneralName.directoryName, name));
         }
@@ -719,11 +768,11 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     }
 
     public Object clone() {
-        CertificateValue certificate = null;
+        Certificate certificate = null;
         try {
             // On récupère l'instance à renvoyer par l'appel de la
             // méthode super.clone()
-            certificate = (CertificateValue) super.clone();
+            certificate = (Certificate) super.clone();
         } catch (CloneNotSupportedException cnse) {
             // Ne devrait jamais arriver car nous implémentons
             // l'interface Cloneable
@@ -749,17 +798,17 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     }
 
 
-    public void setChildren(List<CertificateValue> children) {
+    public void setChildren(List<Certificate> children) {
         this.children = children;
     }
 
-    public List<CertificateValue> getChildren() {
+    public List<Certificate> getChildren() {
         return children;
     }
 
 
     @Override
-    public int compareTo(@NotNull CertificateValue o) {
+    public int compareTo(@NotNull Certificate o) {
         return this.getSubjectString().compareTo(o.getSubjectString());
     }
 
@@ -778,8 +827,7 @@ public class CertificateValue implements ChildInfo<CertificateValue>, Cloneable 
     public Date getTo() {
 
         if (getDuration() > 0) {
-
-            LocalDateTime ldt = LocalDateTime.ofInstant(getNotBefore().toInstant(), ZoneId.systemDefault());
+            LocalDateTime ldt = LocalDateTime.ofInstant(getFrom().toInstant(), ZoneId.systemDefault());
             ZonedDateTime zdt = ldt.plusYears(getDuration()).atZone(ZoneId.systemDefault());
             notAfter = Date.from(zdt.toInstant());
         }

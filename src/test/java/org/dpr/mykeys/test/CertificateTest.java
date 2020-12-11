@@ -9,7 +9,7 @@ import org.dpr.mykeys.app.CertificateType;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.certificate.CSRManager;
 import org.dpr.mykeys.app.certificate.CertificateManager;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.crl.CRLManager;
 import org.dpr.mykeys.app.crl.CrlValue;
 import org.dpr.mykeys.app.keystore.*;
@@ -51,7 +51,7 @@ public class CertificateTest {
     @Test
     public void self_signed_create_ok() {
         boolean isAC = false;
-        CertificateValue certModel = new CertificateValue("aliastest");
+        Certificate certModel = new Certificate("aliastest");
         certModel.setAlgoPubKey("RSA");
         certModel.setAlgoSig("SHA1WithRSAEncryption");
 
@@ -61,7 +61,7 @@ public class CertificateTest {
         cal.add(Calendar.MONTH, 1);
         certModel.setNotBefore(new Date());
         certModel.setNotAfter(cal.getTime());
-        CertificateValue certIssuer = new CertificateValue();
+        Certificate certIssuer = new Certificate();
         certModel.setSubjectMap("CN=toto");
         CertificateManager certServ = new CertificateManager();
 
@@ -78,7 +78,7 @@ public class CertificateTest {
     public void create_from_csr_ok() throws ServiceException {
 
         boolean isAC = false;
-        CertificateValue certModel = new CertificateValue("aliastest");
+        Certificate certModel = new Certificate("aliastest");
         certModel.setAlgoPubKey("RSA");
         certModel.setAlgoSig("SHA1WithRSAEncryption");
 
@@ -91,9 +91,9 @@ public class CertificateTest {
 
         CSRManager certServ = new CSRManager();
         KeyStoreHelper ksh = new KeyStoreHelper();
-        CertificateValue certIssuer = ksh.findCertificateAndPrivateKeyByAlias(getStoreAC(), AC_NAME);
+        Certificate certIssuer = ksh.findCertificateAndPrivateKeyByAlias(getStoreAC(), AC_NAME);
         try {
-            CertificateValue out=certServ.generateCertificate(new FileInputStream(new File("src/test/resources/data/cert1.csr")), certIssuer);
+            Certificate out=certServ.generateCertificate(new FileInputStream(new File("src/test/resources/data/cert1.csr")), certIssuer);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -158,7 +158,7 @@ public class CertificateTest {
     public void generateCRL() throws ServiceException {
 
         KeyStoreHelper ksh = new KeyStoreHelper();
-        CertificateValue certIssuer = ksh.findCertificateAndPrivateKeyByAlias(getStoreAC(), AC_NAME);
+        Certificate certIssuer = ksh.findCertificateAndPrivateKeyByAlias(getStoreAC(), AC_NAME);
         CRLManager man = new CRLManager();
         CrlValue crlValue = new CrlValue();
         List<String> serials = new ArrayList<>();

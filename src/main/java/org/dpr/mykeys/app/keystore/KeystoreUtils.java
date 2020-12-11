@@ -8,11 +8,14 @@ public class KeystoreUtils {
     public static final String KSTYPE_EXT_P12 = "p12";
     private static final String[] KSTYPE_EXTS_PKCS12 = {"p12", "pfx", "pkcs12"};
     private static final String[] KSTYPE_EXTS_DER = {"der", "cer"};
-    private static final String KSTYPE_EXT_PEM = "pem";
+    private static final String[] KSTYPE_EXT_PEM = {"pem", "crt"};
 
     private static final Log log = LogFactory.getLog(KeystoreUtils.class);
 
     public static StoreFormat findKeystoreType(String filename) {
+        return findKeystoreTypeByExtension(filename);
+    }
+        public static StoreFormat findKeystoreTypeByExtension(String filename) {
 
         log.debug("finding type of file...");
         try {
@@ -30,9 +33,12 @@ public class KeystoreUtils {
                     return StoreFormat.DER;
                 }
             }
-            if (ext.equalsIgnoreCase(KSTYPE_EXT_PEM)) {
-                return StoreFormat.PEM;
+            for (String aliasType : KSTYPE_EXT_PEM) {
+                if (ext.equalsIgnoreCase(aliasType)) {
+                    return StoreFormat.PEM;
+                }
             }
+
             return StoreFormat.UNKNOWN;
         } catch (IndexOutOfBoundsException e) {
             return StoreFormat.UNKNOWN;

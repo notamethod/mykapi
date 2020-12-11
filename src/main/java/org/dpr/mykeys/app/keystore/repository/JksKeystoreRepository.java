@@ -3,10 +3,8 @@ package org.dpr.mykeys.app.keystore.repository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.KeyToolsException;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.ServiceException;
-import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
 import java.io.*;
@@ -27,7 +25,7 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
 
     @Override
-    public void removeCertificates(KeyStoreValue ksValue, List<CertificateValue> certificates) throws RepositoryException{
+    public void removeCertificates(KeyStoreValue ksValue, List<Certificate> certificates) throws RepositoryException{
 
         try {
 
@@ -35,9 +33,9 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
                 ksValue.setKeystore(loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
             }
-            List<CertificateValue> certs = getCertificates(ksValue);
+            List<Certificate> certs = getCertificates(ksValue);
 
-            for (CertificateValue certificateInfo : certificates) {
+            for (Certificate certificateInfo : certificates) {
                 if (certificateInfo != null) {
                     certs.remove(certificateInfo);
                     ksValue.getKeystore().deleteEntry(certificateInfo.getAlias());
@@ -56,7 +54,7 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
     }
 
     @Override
-    public void saveCertificates(KeyStoreValue ksValue, List<CertificateValue> certInfos) {
+    public void saveCertificates(KeyStoreValue ksValue, List<Certificate> certInfos) {
 
     }
 
@@ -85,5 +83,9 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
     @Override
     protected StoreFormat getFormat() {
         return format;
+    }
+
+    public void changeAlias(String oldAlias, String newAlias){
+        //FIXME: implementMethod
     }
 }

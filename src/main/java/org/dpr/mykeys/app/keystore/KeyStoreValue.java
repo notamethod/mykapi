@@ -4,11 +4,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.NodeInfo;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
+
 
 import java.io.File;
 import java.security.KeyStore;
-import java.util.ArrayList;
 import java.util.List;
 
 public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKeystoreValue {
@@ -22,7 +22,10 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
     //TODO
     private final boolean isTemp = false;
     //TODO
-    private final boolean isProtected = false;
+    private  boolean isProtected = true;
+
+
+
     //TODO
     private KeyStore keystore;
 
@@ -30,10 +33,23 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
 
     public KeyStoreValue(String path, StoreFormat format) {
         super(path, format);
+        checkFormat(format);
     }
+
+    private void checkFormat(StoreFormat format) {
+        switch (format) {
+            case PEM:
+            case DER:
+                isProtected = false;
+                isOpen = true;
+
+
+        }
+    }
+
     public KeyStoreValue(String name, String filePath, StoreModel storeModel,
                          StoreFormat storeFormat) {
-        super(filePath, storeFormat);
+        this(filePath, storeFormat);
         this.name = FilenameUtils.getName(name);
         this.storeModel = storeModel;
     }
@@ -57,7 +73,7 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
 
     @Override
     public boolean isProtected() {
-        return true;
+        return isProtected;
     }
 
     @Override
@@ -108,7 +124,10 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
 
     /**
      * @return the isOpen
+     *
+     * @deprecated replace with {@link Certificate#isAcceptChildAC()}
      */
+    @Deprecated
     public boolean isCAStore() {
         return (this.storeModel.equals(StoreModel.PKISTORE) || this.storeModel.equals(StoreModel.CASTORE));
     }
@@ -191,11 +210,11 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
     }
 
     @Override
-    public List<CertificateValue> getChildList() {
+    public List<Certificate> getChildList() {
         return getCertificates();
     }
 
-    public void setChildList(List<CertificateValue> certificates) {
+    public void setChildList(List<Certificate> certificates) {
         setCertificates(certificates);
     }
 

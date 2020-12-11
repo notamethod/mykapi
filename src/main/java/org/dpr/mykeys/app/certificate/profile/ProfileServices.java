@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.profile;
+package org.dpr.mykeys.app.certificate.profile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +16,9 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.ChildInfo;
+import org.dpr.mykeys.app.certificate.MkCertificate;
 import org.dpr.mykeys.app.KeyUsages;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 
 
 public class ProfileServices
@@ -50,7 +50,7 @@ public class ProfileServices
 
     }
 
-    public static List<? extends ChildInfo> getProfils(String cfgPath) {
+    public static List<? extends MkCertificate> getProfils(String cfgPath) {
         List<CertificateTemplate> profs = new ArrayList<>();
 
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(cfgPath))) {
@@ -65,7 +65,7 @@ public class ProfileServices
 
     }
 
-    public void saveToFile(Map<String, Object> elements, String name, CertificateValue certInfo, boolean isEditing)
+    public void saveToFile(Map<String, Object> elements, String name, Certificate certInfo, boolean isEditing)
             throws ProfilException, IOException {
         if (StringUtils.isBlank(name)) {
             throw new ProfilException("nom obligatoire");

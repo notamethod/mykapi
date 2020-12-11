@@ -3,7 +3,7 @@
  */
 package org.dpr.mykeys.app.signature;
 
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 
 
 /**
@@ -17,7 +17,7 @@ public class SignTools {
 		
 	}
 
-	public void SignData(Object object, CertificateValue certInfo, String string, boolean isInclude) {
+	public void SignData(Object object, Certificate certInfo, String string, boolean isInclude) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -4,13 +4,14 @@
 
     <groupId>com.notamethod</groupId>
 
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
 
 
     <artifactId>mykeys-api</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.6.1</junit.version>
+        <bc.version>1.65</bc.version>
     </properties>
 
     <dependencies>
@@ -22,19 +23,19 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.58</version>
+            <version>${bc.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.58</version>
+            <version>${bc.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
-            <version>1.58</version>
+            <version>${bc.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>

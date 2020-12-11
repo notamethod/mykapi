@@ -4,7 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.KeyToolsException;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.utils.CertificateUtils;
 
 import java.io.*;
@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 
@@ -62,28 +61,28 @@ public class KeystoreBuilder {
 
     }
 
-    public void addCertToKeyStoreNew(KeyStoreValue ksInfo, CertificateValue certInfo)
+    public void addCertToKeyStoreNew(KeyStoreValue ksInfo, Certificate certInfo)
             throws KeyToolsException {
 
         saveCertChain(keystore, certInfo);
         saveKeyStore(keystore, ksInfo);
     }
 
-    public KeystoreBuilder addCert(KeyStoreValue ksInfo, CertificateValue certInfo) throws KeyToolsException {
+    public KeystoreBuilder addCert(KeyStoreValue ksInfo, Certificate certInfo) throws KeyToolsException {
         saveCertChain(keystore, certInfo);
         saveKeyStore(keystore, ksInfo);
         return this;
     }
 
-    public KeystoreBuilder addCerts(KeyStoreValue ksInfo, List<CertificateValue> certs) throws KeyToolsException {
-        for (CertificateValue certInfo : certs) {
+    public KeystoreBuilder addCerts(KeyStoreValue ksInfo, List<Certificate> certs) throws KeyToolsException {
+        for (Certificate certInfo : certs) {
             saveCertChain(keystore, certInfo);
         }
         saveKeyStore(keystore, ksInfo);
         return this;
     }
 
-    private String saveCertChain(KeyStore keystore, CertificateValue certInfo) throws KeyToolsException {
+    private String saveCertChain(KeyStore keystore, Certificate certInfo) throws KeyToolsException {
 
         if (StringUtils.isBlank(certInfo.getAlias())) {
             BigInteger bi = CertificateUtils.randomBigInteger(30);
@@ -96,9 +95,9 @@ public class KeystoreBuilder {
             if (certInfo.getPrivateKey() == null) {
                 keystore.setCertificateEntry(certInfo.getAlias(), certInfo.getCertificate());
             } else {
-                Certificate[] chaine = certInfo.getCertificateChain();
+                java.security.cert.Certificate[] chaine = certInfo.getCertificateChain();
                 if (chaine == null)
-                    chaine = new Certificate[]{certInfo.getCertificate()};
+                    chaine = new java.security.cert.Certificate[]{certInfo.getCertificate()};
                 keystore.setKeyEntry(certInfo.getAlias(), certInfo.getPrivateKey(), certInfo.getPassword(), chaine);
             }
 

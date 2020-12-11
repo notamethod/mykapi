@@ -1,27 +1,15 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.KeyToolsException;
-import org.dpr.mykeys.app.ServiceException;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.*;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.security.*;
 import java.util.List;
 
 public abstract class AbstractSimpleKeystoreRepository extends KeystoreRepository {
@@ -47,14 +35,22 @@ public abstract class AbstractSimpleKeystoreRepository extends KeystoreRepositor
     }
 
     @Override
-    public void addCertificates(KeyStoreValue ki, List<CertificateValue> certificates) throws RepositoryException {
-        //TODO
+    public void addCertificates(MKKeystoreValue ki, List<Certificate> certificates) throws RepositoryException {
+        ki.getCertificates().addAll(certificates);
+        save(ki,  SAVE_OPTION.REPLACE);
     }
 
     @Override
     public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
         MKKeystoreValue keystoreValue = new SimpleKeystoreValue(name, this.format);
         keystoreValue.setCertificates(getCertificates(keystoreValue));
+        keystoreValue.setLoaded(true);
         return keystoreValue;
+    }
+
+    @Override
+    public PrivateKey getPrivateKey(MKKeystoreValue mksValue, String alias, char[] password) throws
+            RepositoryException {
+        throw new RepositoryException("not implemented");
     }
 }

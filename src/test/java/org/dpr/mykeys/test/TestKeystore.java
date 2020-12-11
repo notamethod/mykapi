@@ -8,7 +8,7 @@ import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.TamperedWithException;
 import org.dpr.mykeys.app.certificate.CertificateManager;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
@@ -16,18 +16,18 @@ import org.dpr.mykeys.app.utils.ProviderUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.dpr.mykeys.app.keystore.StoreFormat.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -101,7 +101,7 @@ public class TestKeystore {
                 StoreModel.CERTSTORE, StoreFormat.JKS);
         ksInfo.setPassword("111".toCharArray());
         try {
-            boolean changed = service.changePassword(ksInfo, "bbb".toCharArray());
+            boolean changed = service.changePassword(ksInfo, null, "bbb".toCharArray());
             assertTrue(changed);
         } catch (TamperedWithException | KeyToolsException | ServiceException e) {
             e.printStackTrace();
@@ -110,6 +110,14 @@ public class TestKeystore {
 
         MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
         mkKeystore.load(fileName, "bbb".toCharArray() );
+        try {
+            boolean changed = service.changePassword(ksInfo, "bbb".toCharArray(), "ccc".toCharArray());
+            assertTrue(changed);
+        } catch (TamperedWithException | KeyToolsException | ServiceException e) {
+            e.printStackTrace();
+            fail();
+        }
+        mkKeystore.load(fileName, "ccc".toCharArray() );
     }
 
     @Test
@@ -146,7 +154,7 @@ public class TestKeystore {
             MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
             ki = mkKeystore.create(filename, "111".toCharArray());
             //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
-            CertificateValue val = createCert();
+            Certificate val = createCert();
             val.setPassword(pwd);
             //ki.setPassword(pwd);
 
@@ -215,9 +223,9 @@ public class TestKeystore {
         }
     }
 
-    private CertificateValue createCert() {
+    private Certificate createCert() {
         boolean isAC = false;
-        CertificateValue certModel = new CertificateValue("aliastest");
+        Certificate certModel = new Certificate("aliastest");
         certModel.setAlgoPubKey("RSA");
         certModel.setAlgoSig("SHA1WithRSAEncryption");
 
@@ -227,10 +235,10 @@ public class TestKeystore {
         cal.add(Calendar.MONTH, 1);
         certModel.setNotBefore(new Date());
         certModel.setNotAfter(cal.getTime());
-        CertificateValue certIssuer = new CertificateValue();
+        Certificate certIssuer = new Certificate();
         CertificateManager certServ = new CertificateManager();
 
-        CertificateValue retValue = null;
+        Certificate retValue = null;
         try {
             retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
         } catch (Exception e) {
@@ -245,7 +253,7 @@ public class TestKeystore {
     @Test
     public void testCreateCert() {
         boolean isAC = false;
-        CertificateValue certModel = new CertificateValue("aliastest");
+        Certificate certModel = new Certificate("aliastest");
         certModel.setAlgoPubKey("RSA");
         certModel.setAlgoSig("SHA1WithRSAEncryption");
 
@@ -256,15 +264,15 @@ public class TestKeystore {
         certModel.setNotBefore(new Date());
         certModel.setNotAfter(cal.getTime());
         certModel.setPolicyCPS("CPO000");
-        CertificateValue certIssuer = new CertificateValue();
+        Certificate certIssuer = new Certificate();
         CertificateManager certServ = new CertificateManager();
 
-        CertificateValue retValue = null;
+        Certificate retValue = null;
         try {
             retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
             System.out.println(retValue.getPolicyCPS());
 
-            CertificateValue cv = new CertificateValue("xx", retValue.getCertificate());
+            Certificate cv = new Certificate("xx", retValue.getCertificate());
             System.out.println(cv.getOtherParams());
         } catch (Exception e) {
             e.printStackTrace();
@@ -279,8 +287,8 @@ public class TestKeystore {
     public void testExport() {
 
         Path resourceDirectory = Paths.get("target/test-classes/data/test1.pem");
-        CertificateValue cv = createCert();
-        List<CertificateValue> listCert = new ArrayList<>();
+        Certificate cv = createCert();
+        List<Certificate> listCert = new ArrayList<>();
         listCert.add(cv);
         String fileName = resourceDirectory.toAbsolutePath().toString();
         KeyStoreHelper service = new KeyStoreHelper();
@@ -293,8 +301,8 @@ public class TestKeystore {
         service = new KeyStoreHelper(ksv);
         boolean found = false;
         try {
-            List<CertificateValue> certs = service.getCertificates();
-            for (CertificateValue cert : certs) {
+            List<Certificate> certs = service.getCertificates();
+            for (Certificate cert : certs) {
                 if (cert.getPublicKey().equals(cv.getPublicKey())) {
                     found = true;
                     break;
@@ -307,26 +315,29 @@ public class TestKeystore {
     }
 
     @Test
-    public void importPem() throws ServiceException, KeyStoreException, IOException, RepositoryException {
+    public void importPemToJks() throws ServiceException, KeyStoreException, IOException, RepositoryException, CertificateException, NoSuchAlgorithmException {
 
         char[] pwd = "111".toCharArray();
         String filename = "target/test-classes/data/my.jks";
         String filenamePem = "target/test-classes/data/pem/3cdeb3d0.pem";
-        MKKeystoreValue ki = null;
+      //  MKKeystoreValue ki = null;
 
         MkKeystore mks = MkKeystore.getInstance(StoreFormat.PEM);
-        KeyStoreValue ksv = new KeyStoreValue(filenamePem, StoreFormat.PEM);
+        MKKeystoreValue ksv = mks.load(filenamePem, null);
 
-        try {
-            ki = emptyKeystore(filename, pwd);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-        KeyStoreHelper service = new KeyStoreHelper((KeyStoreValue) ki);
-        service.importX509CertToJks(null, (KeyStoreValue) ki, ksv, "111".toCharArray(), null);
-        //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
         MkKeystore jks = MkKeystore.getInstance(StoreFormat.JKS);
+        MKKeystoreValue ki = emptyKeystore(filename, pwd);
+//        try {
+//            ki = emptyKeystore(filename, pwd);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            fail();
+//        }
+        KeyStoreHelper service = new KeyStoreHelper();
+        jks.addCertificates((KeyStoreValue) ki, ksv.getCertificates());
+        //service.importElements(null, (KeyStoreValue) ki, ksv, "111".toCharArray(), null);
+        //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
+        jks = MkKeystore.getInstance(StoreFormat.JKS);
         MKKeystoreValue reloaded = jks.load(filename, pwd);
         assertEquals(1, reloaded.getCertificates().size());
     }
@@ -359,6 +370,64 @@ public class TestKeystore {
 
     }
 
+
+    @Test
+    public void findType() throws IOException, RepositoryException {
+        Path source = TestUtils.getCopy("pem/fffpem");
+        KeyStoreHelper service = new KeyStoreHelper();
+        StoreFormat f = service.findKeystoreType(source.toAbsolutePath().toString());
+        assertEquals(StoreFormat.PEM, f);
+    }
+    @Test
+    public void findTypeByContent() throws IOException, RepositoryException {
+        Path source = TestUtils.getCopy("pem/fffpem");
+        KeyStoreHelper service = new KeyStoreHelper();
+        service.findKeystoreTypeByContent(source.toAbsolutePath().toString());
+    }
+
+    @Test
+    public void findTypeByContentJks() throws IOException, RepositoryException {
+        Path source = TestUtils.getCopy("guesstype/unknownjks");
+        KeyStoreHelper service = new KeyStoreHelper();
+        StoreFormat format=service.findKeystoreTypeByContent(source.toAbsolutePath().toString());
+        assertEquals(StoreFormat.JKS, format);
+    }
+
+    @Test
+    public void findTypeByContentP12() throws IOException, RepositoryException {
+        Path source = TestUtils.getCopy("guesstype/unknownp12");
+        KeyStoreHelper service = new KeyStoreHelper();
+        StoreFormat format=service.findKeystoreTypeByContent(source.toAbsolutePath().toString());
+        assertEquals(StoreFormat.PKCS12, format);
+    }
+
+    @Test
+    public void exportPrivateKey() throws IOException, RepositoryException {
+       // Path source = TestUtils.getCopy("guesstype/unknownp12");
+        Path source = TestUtils.getCopy("p12/onecertwthkey.p12");
+        String target = "target/test-classes/data/privatekey.crt";
+        File f = new File(target);
+        System.out.println(f.getAbsolutePath());
+        f.delete();
+        MkKeystore ksP12 = MkKeystore.getInstance(PKCS12);
+        MKKeystoreValue p12Value = ksP12.load(source.toAbsolutePath().toString(), "aaa".toCharArray());
+        Certificate cert = p12Value.getCertificates().get(0);
+        PrivateKey pk = ksP12.getPrivateKey(p12Value, cert.getAlias(), "aaa".toCharArray());
+        MkKeystore ksPem = MkKeystore.getInstance(PEM);
+        MKKeystoreValue pemValue = ksPem.create(target, null);
+        KeyStoreHelper service = new KeyStoreHelper();
+
+        FileOutputStream fos = new FileOutputStream(new File(target));
+
+        try {
+            service.exportPrivateKey(pk, fos, StoreFormat.PEM, null);
+            fos.close();
+        } catch (KeyToolsException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private MKKeystoreValue emptyKeystore(String filename, char[] pwd) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, ServiceException, RepositoryException {
         Path target = Paths.get(filename);
 
@@ -368,4 +437,6 @@ public class TestKeystore {
         return mkKeystore.create(filename, "111".toCharArray());
 
     }
+
+
 }

@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app.profile;
+package org.dpr.mykeys.app.certificate.profile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,12 +7,11 @@ import java.nio.file.Path;
 import java.util.Enumeration;
 
 import org.apache.commons.io.FilenameUtils;
-import org.dpr.mykeys.app.ChildInfo;
-import org.dpr.mykeys.app.ChildType;
+import org.dpr.mykeys.app.certificate.MkCertificate;
 import org.dpr.mykeys.app.utils.OrderedProperties;
 import org.jetbrains.annotations.NotNull;
 
-public class CertificateTemplate implements ChildInfo<CertificateTemplate> {
+public class CertificateTemplate implements MkCertificate<CertificateTemplate> {
 
     private final OrderedProperties p;
 

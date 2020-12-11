@@ -1,10 +1,10 @@
-package org.dpr.mykeys.app.profile;
+package org.dpr.mykeys.app.certificate.profile;
 
 import java.io.File;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.dpr.mykeys.app.ChildInfo;
+import org.dpr.mykeys.app.certificate.MkCertificate;
 import org.dpr.mykeys.app.NodeInfo;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.StoreModel;
@@ -176,7 +176,7 @@ public class ProfilStoreInfo implements NodeInfo {
 	}
 
 	@Override
-	public List<? extends ChildInfo> getChildList() {
+	public List<? extends MkCertificate> getChildList() {
 		// TODO Auto-generated method stub
 		return null;
 	}

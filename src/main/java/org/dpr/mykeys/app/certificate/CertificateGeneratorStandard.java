@@ -47,7 +47,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
     }
 
-    public CertificateValue generate(KeyPair keypair, CertificateValue certModel, CertificateValue certIssuer)
+    public Certificate generate(KeyPair keypair, Certificate certModel, Certificate certIssuer)
             throws Exception {
 
 
@@ -156,7 +156,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
         } else {
             certChain = new X509Certificate[]{cert};
         }
-        CertificateValue certReturn = new CertificateValue(certChain);
+        Certificate certReturn = new Certificate(certChain);
         certReturn.setPrivateKey(keypair.getPrivate());
         certReturn.setPublicKey(keypair.getPublic());
         certReturn.setPassword(certModel.getPassword());
@@ -189,7 +189,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
     }
 
-    public CertificateValue createCertificateAuth(String id, char[] charArray, KeyPair keypair) throws ServiceException {
+    public Certificate createCertificateAuth(String id, char[] charArray, KeyPair keypair) throws ServiceException {
 
         X500Name subject = new X500Name("CN=" + id);
         BigInteger serial = new BigInteger(32, new SecureRandom());
@@ -200,14 +200,14 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(subject, serial, from, to, subject,
                 keypair.getPublic());
 
-        CertificateValue value = null;
+        Certificate value = null;
         try {
             ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keypair.getPrivate());
             X509CertificateHolder certHolder = builder.build(signer);
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ProviderUtil.provider).getCertificate(certHolder);
 
             cert.verify(keypair.getPublic());
-            value = new CertificateValue(id, cert);
+            value = new Certificate(id, cert);
             log.info("certificate " + id + " generated");
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new ServiceException("create auth error", e);

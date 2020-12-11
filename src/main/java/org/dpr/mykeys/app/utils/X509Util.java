@@ -123,6 +123,11 @@ public class X509Util {
         return getInfosMap(x500Principal);
     }
 
+    /**
+     *
+     * @param x500Principal
+     * @return
+     */
     public static Map<ASN1ObjectIdentifier, String> getInfosMap(X500Principal x500Principal) {
         Map<ASN1ObjectIdentifier, String> subjectMap = new HashMap<>();
         if (x500Principal == null) {
@@ -151,6 +156,8 @@ public class X509Util {
         return subjectMap;
     }
 
+
+
     /**
      * Récupération des points de distribution des CRL.
      *
@@ -166,7 +173,7 @@ public class X509Util {
         byte[] extVal = certX509.getExtensionValue(Extension.cRLDistributionPoints.getId());
         byte[] extension = certX509.getExtensionValue(Extension.cRLDistributionPoints.toString());
         if (extension == null) {
-            log.info("No CRLDistributionPoint for: "
+            log.debug("No CRL Distribution Point for: "
                     + certX509.getSubjectDN());//
             return distPointSet;
         }

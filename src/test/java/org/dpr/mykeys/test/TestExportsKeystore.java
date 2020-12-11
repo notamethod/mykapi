@@ -6,9 +6,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpr.mykeys.app.CertificateType;
 import org.dpr.mykeys.app.KeyToolsException;
 import org.dpr.mykeys.app.certificate.CertificateManager;
-import org.dpr.mykeys.app.certificate.CertificateValue;
+import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreHelper;
-import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
@@ -58,9 +57,9 @@ public class TestExportsKeystore {
     }
 
 
-    private CertificateValue createCert() {
+    private Certificate createCert() {
         boolean isAC = false;
-        CertificateValue certModel = new CertificateValue("aliastest");
+        Certificate certModel = new Certificate("aliastest");
         certModel.setAlgoPubKey("RSA");
         certModel.setAlgoSig("SHA1WithRSAEncryption");
 
@@ -70,10 +69,10 @@ public class TestExportsKeystore {
         cal.add(Calendar.MONTH, 1);
         certModel.setNotBefore(new Date());
         certModel.setNotAfter(cal.getTime());
-        CertificateValue certIssuer = new CertificateValue();
+        Certificate certIssuer = new Certificate();
         CertificateManager certServ = new CertificateManager();
 
-        CertificateValue retValue = null;
+        Certificate retValue = null;
         try {
             retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
         } catch (Exception e) {
@@ -178,24 +177,24 @@ public class TestExportsKeystore {
     private void testExport(Path source, String targetName, StoreFormat formatIn, StoreFormat formatOut , char[] passwordIn, char[] password) throws RepositoryException, IOException, KeyToolsException {
         MKKeystoreValue keyStoreValue = null;
 
-        List<CertificateValue> certificateValues = null;
+        List<Certificate> certificates = null;
 
         Path target = Paths.get("target/test-classes/data/"+targetName+formatOut.getExtension());
         MkKeystore mkKeystore = MkKeystore.getInstance(formatIn);
         String fileName = source.toAbsolutePath().toString();
 
         keyStoreValue = mkKeystore.load(fileName, passwordIn);
-        certificateValues = keyStoreValue.getCertificates();
-        assertEquals(2, certificateValues.size());
+        certificates = keyStoreValue.getCertificates();
+        assertEquals(2, certificates.size());
 
         KeyStoreHelper service = new KeyStoreHelper();
-        service.export(certificateValues, target.toAbsolutePath().toString(), formatOut, password, MkKeystore.SAVE_OPTION.REPLACE);
+        service.export(certificates, target.toAbsolutePath().toString(), formatOut, password, MkKeystore.SAVE_OPTION.REPLACE);
 
         //verify
         mkKeystore = MkKeystore.getInstance(formatOut);
         MKKeystoreValue out = mkKeystore.load(target.toAbsolutePath().toString(), password);
-        certificateValues = out.getCertificates();
-        assertEquals(2, certificateValues.size());
+        certificates = out.getCertificates();
+        assertEquals(2, certificates.size());
     }
 
 }

@@ -3,7 +3,7 @@
  */
 package org.dpr.mykeys.app.crl;
 
-import org.dpr.mykeys.app.ChildInfo;
+import org.dpr.mykeys.app.certificate.MkCertificate;
 import org.dpr.mykeys.app.NodeInfo;
 
 import java.math.BigInteger;
@@ -161,7 +161,7 @@ public class CrlValue implements NodeInfo {
     }
 
     @Override
-    public List<? extends ChildInfo> getChildList() {
+    public List<? extends MkCertificate> getChildList() {
         // TODO Auto-generated method stub
         return null;
     }

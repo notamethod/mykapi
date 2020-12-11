@@ -61,7 +61,7 @@ public class KeyUsages {
     }
     public static String toString(int value){
         Map<Integer, String> invertedMap =
-                map.entrySet()
+                getMap().entrySet()
                         .stream()
                         .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         return invertedMap.get(value);
