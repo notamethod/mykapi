@@ -1,6 +1,7 @@
 package org.dpr.mykeys.app.keystore;
 
 import org.dpr.mykeys.app.certificate.Certificate;
+import org.dpr.mykeys.app.certificate.CryptoObject;
 
 import java.util.List;
 
@@ -14,6 +15,6 @@ public interface MKKeystoreValue {
     void setLoaded(boolean loaded);
     StoreFormat getStoreFormat() ;
      void setStoreFormat(StoreFormat storeFormat);
-     List<Object>  getElements();
+     List<CryptoObject> getElements();
 
 }

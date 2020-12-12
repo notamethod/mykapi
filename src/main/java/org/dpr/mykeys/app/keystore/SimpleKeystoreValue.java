@@ -1,6 +1,7 @@
 package org.dpr.mykeys.app.keystore;
 
 import org.dpr.mykeys.app.certificate.Certificate;
+import org.dpr.mykeys.app.certificate.CryptoObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class SimpleKeystoreValue implements MKKeystoreValue {
     private final List<Certificate> certificates = new ArrayList<>();
-    private final List<Object> elements = new ArrayList<>();
+    private final List<CryptoObject> elements = new ArrayList<>();
     protected String path;
     protected StoreFormat storeFormat;
     private boolean isLoaded = false;
@@ -53,15 +54,15 @@ public class SimpleKeystoreValue implements MKKeystoreValue {
         this.certificates.addAll(certificates);
     }
 
-    public void addElement(Object object){
+    public void addElement(CryptoObject object){
         elements.add(object);
     }
-    public void addAllElements(List<Object> elements){
 
+    public void addAllElements(List<CryptoObject> elements){
         this.elements.addAll(elements);
     }
 
-    public List<Object>  getElements(){
+    public List<CryptoObject> getElements(){
         return elements;
     }
 }

@@ -3,6 +3,7 @@ package org.dpr.mykeys.app.keystore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.*;
+import org.dpr.mykeys.app.certificate.CryptoObject;
 import org.dpr.mykeys.app.keystore.repository.EntityAlreadyExistsException;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.keystore.repository.PemKeystoreRepository;
@@ -161,15 +162,15 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         return loadKeyStore(ksName, format, pwd).getKeystore();
     }
 
-    public List<Object> getElements(MKKeystoreValue mkKeystoreValue) throws ServiceException {
-        List<Object> certs = new ArrayList<>();
+    public List<CryptoObject> getElements(MKKeystoreValue mkKeystoreValue) throws ServiceException {
+        List<CryptoObject> certs = new ArrayList<>();
 
         if (mkKeystoreValue instanceof KeyStoreValue && ((KeyStoreValue) mkKeystoreValue).getPassword() == null && mkKeystoreValue.getStoreFormat().equals(StoreFormat.PKCS12)) {
             return certs;
         }
-        if (mkKeystoreValue.getStoreFormat().equals(StoreFormat.UNKNOWN))
+        if (mkKeystoreValue.getStoreFormat().equals(StoreFormat.UNKNOWN)) {
             mkKeystoreValue.setStoreFormat(findKeystoreType(ksInfo.getPath()));
-
+        }
         MkKeystore mks = MkKeystore.getInstance(ksInfo.getStoreFormat());
         if (!mkKeystoreValue.isLoaded()) {
             try {
@@ -266,9 +267,9 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         return certs;
     }
 
-    public List<Object> getChildList(MKKeystoreValue mkKeystoreValue) throws ServiceException {
+    public List<CryptoObject> getChildList(MKKeystoreValue mkKeystoreValue) throws ServiceException {
 
-        List<Object> certs;
+        List<CryptoObject> certs;
         certs = getElements(mkKeystoreValue);
         log.debug("get child list" + certs.size());
         return certs;
@@ -744,7 +745,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         mkKeystore = MkKeystore.getInstance(StoreFormat.PEM);
         try {
            MKKeystoreValue storeValue= mkKeystore.load(filename, "".toCharArray());
-           List<Object> objects =  ((PemKeystoreRepository) mkKeystore).getElements(storeValue);
+           List<CryptoObject> objects =  ((PemKeystoreRepository) mkKeystore).getElements(storeValue);
             if (objects != null && !objects.isEmpty())
                 return StoreFormat.PEM;
         } catch (RepositoryException e) {

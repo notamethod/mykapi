@@ -13,7 +13,9 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObject;
+import org.dpr.mykeys.app.PrivateKeyValue;
 import org.dpr.mykeys.app.certificate.Certificate;
+import org.dpr.mykeys.app.certificate.CryptoObject;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.ServiceException;
 
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
 
@@ -51,15 +54,10 @@ public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
                     throw new RepositoryException(e);
                 }
             }
-            List<Certificate> certs = new ArrayList<>();
-            for (Object object : simpleKeystoreValue.getElements()) {
-                System.out.println(object.getClass().getName());
-                 if (object instanceof Certificate){
-                    certs.add((Certificate) object);
-                }
-
-            }
-
+            List<Certificate> certs = simpleKeystoreValue.getElements().stream()
+                    .filter(obj -> obj instanceof Certificate)
+                    .map(obj -> (Certificate) obj)
+                    .collect(Collectors.toList());
 
             ksValue.setCertificates(certs); //sure ?
             return certs;
@@ -101,10 +99,10 @@ public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
 
     }
 
-    public List<Object> getElements(MKKeystoreValue ksValue)
+    public List<CryptoObject> getElements(MKKeystoreValue ksValue)
             throws RepositoryException {
 
-        List<Object> elements = new ArrayList<>();
+        List<CryptoObject> elements = new ArrayList<>();
         try (BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream(ksValue.getPath())))) {
             PEMParser reader = new PEMParser(buf);
             Object object;
@@ -118,7 +116,7 @@ public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
                         privateKey = jcaPEMKeyConverter.getPrivateKey(pki);
                         String algOid = pki.getPrivateKeyAlgorithm().getAlgorithm().getId();
                         //privateKey.get
-                        elements.add(privateKey);
+                        elements.add(new PrivateKeyValue(privateKey));
                     } catch (PEMException e) {
                         log.error("unreadable objet ", e);
                     }
@@ -318,7 +316,7 @@ public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
     @Override
     public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
         SimpleKeystoreValue keystoreValue = new SimpleKeystoreValue(name, this.format);
-        List<Object> elements = getElements(keystoreValue);
+        List<CryptoObject> elements = getElements(keystoreValue);
         keystoreValue.addAllElements(elements);
         keystoreValue.setLoaded(true);
         getCertificates(keystoreValue);
