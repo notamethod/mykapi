@@ -23,12 +23,14 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Certificate   implements MkCertificate<Certificate>, Cloneable, CryptoObject   {
     private static final Log log = LogFactory.getLog(Certificate.class);
@@ -232,12 +234,9 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         try {
             this.setOtherParams(PoliciesUtil.getExtensionPolicies(certX509));
         } catch (PoliciesException e) {
-            e.printStackTrace();
+           log.warn("cant' parse policies", e);
         }
-//        this.setPolicyCPS(String.valueOf(X509Util.getPolicy(certX509, PolicyQualifierId.id_qt_cps)));
-//        this.setPolicyNotice(String.valueOf(X509Util.getPolicy(certX509, PolicyQualifierId.id_qt_unotice)));
-//        System.out.println(this.getPolicyCPS());
-//        System.out.println(this.getPolicyNotice());
+
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.update(certX509.getEncoded());
 
@@ -341,6 +340,13 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         return password;
     }
 
+    @Override
+    public String getHumanIdentifier() {
+        return getSubjectList().stream()
+                .map(e->/*e.getKey()+": "+*/e.getValue())
+                .collect(Collectors.joining(", "));
+    }
+
     /**
      * @param password the password to set
      */
@@ -353,23 +359,6 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
      */
     public Hashtable getX509PrincipalMap() {
         return x509PrincipalMap;
-    }
-
-    /**
-     * @param sourceMap the x509PrincipalMap to set
-     */
-    @Deprecated
-    public void setX509PrincipalMapOld(Map<String, String> sourceMap) {
-
-        x509PrincipalMap.put(X509Principal.C, sourceMap.get("x509PrincipalC"));
-        x509PrincipalMap.put(X509Principal.O, sourceMap.get("x509PrincipalO"));
-        x509PrincipalMap.put(X509Principal.L, sourceMap.get("x509PrincipalL"));
-        x509PrincipalMap
-                .put(X509Principal.ST, sourceMap.get("x509PrincipalST"));
-        x509PrincipalMap.put(X509Principal.E, sourceMap.get("x509PrincipalE"));
-        x509PrincipalMap
-                .put(X509Principal.CN, sourceMap.get("x509PrincipalCN"));
-
     }
 
     public String getFreeSubject() {
@@ -788,7 +777,7 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         return isContainsPrivateKey() && (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN));
     }
 
-    public CertificateType getType() {
+    public CertificateType getCertificaType() {
         if (isContainsPrivateKey()) {
             if (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN))
                 return CertificateType.AC;
@@ -835,4 +824,20 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
 
     }
 
+    @Override
+    public byte[] getEncoded() {
+        byte[] encoded;
+        try {
+             encoded = this.certificate.getEncoded();
+        } catch (CertificateEncodingException e) {
+            log.error("can't encode certificate", e);
+            return null;
+        }
+        return encoded;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.CERTIFICATE;
+    }
 }

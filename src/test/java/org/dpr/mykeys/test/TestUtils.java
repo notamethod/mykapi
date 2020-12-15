@@ -9,7 +9,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TestUtils {
 
-    static Path getCopy(String filename, String suffix) throws IOException {
+    public static Path getCopy(String filename, String suffix) throws IOException {
         String root = "src/test/resources/data/";
         String rootCopy = "target/test-classes/data/";
         Path source = Paths.get(root + filename);
@@ -18,7 +18,7 @@ public class TestUtils {
         return target;
     }
 
-    static Path getCopy(String filename) throws IOException {
+    public static Path getCopy(String filename) throws IOException {
         return getCopy(filename,"work");
     }
 }

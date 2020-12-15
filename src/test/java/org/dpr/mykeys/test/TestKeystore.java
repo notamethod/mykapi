@@ -154,7 +154,7 @@ public class TestKeystore {
             MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
             ki = mkKeystore.create(filename, "111".toCharArray());
             //ki = service.loadKeyStore(filename, StoreFormat.JKS, "111".toCharArray());
-            Certificate val = createCert();
+            Certificate val =  DummyData.newCertificate();
             val.setPassword(pwd);
             //ki.setPassword(pwd);
 
@@ -223,32 +223,7 @@ public class TestKeystore {
         }
     }
 
-    private Certificate createCert() {
-        boolean isAC = false;
-        Certificate certModel = new Certificate("aliastest");
-        certModel.setAlgoPubKey("RSA");
-        certModel.setAlgoSig("SHA1WithRSAEncryption");
 
-        certModel.setKeyLength(1024);
-        certModel.setSubjectMap("CN=toto");
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 1);
-        certModel.setNotBefore(new Date());
-        certModel.setNotAfter(cal.getTime());
-        Certificate certIssuer = new Certificate();
-        CertificateManager certServ = new CertificateManager();
-
-        Certificate retValue = null;
-        try {
-            retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e);
-            fail(e.getMessage());
-        }
-        return retValue;
-
-    }
 
     @Test
     public void testCreateCert() {
@@ -287,7 +262,7 @@ public class TestKeystore {
     public void testExport() {
 
         Path resourceDirectory = Paths.get("target/test-classes/data/test1.pem");
-        Certificate cv = createCert();
+        Certificate cv = DummyData.newCertificate();
         List<Certificate> listCert = new ArrayList<>();
         listCert.add(cv);
         String fileName = resourceDirectory.toAbsolutePath().toString();
@@ -309,8 +284,9 @@ public class TestKeystore {
                 }
             }
             assertTrue(found);
-        } catch (ServiceException e) {
+        } catch (ServiceException | UnknownKeystoreTypeException e) {
             e.printStackTrace();
+            fail();
         }
     }
 

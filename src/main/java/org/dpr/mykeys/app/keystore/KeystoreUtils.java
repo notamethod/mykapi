@@ -2,6 +2,17 @@ package org.dpr.mykeys.app.keystore;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.NestedExceptionUtils;
+import org.dpr.mykeys.app.keystore.repository.MkKeystore;
+import org.dpr.mykeys.app.keystore.repository.PemKeystoreRepository;
+import org.dpr.mykeys.app.keystore.repository.RepositoryException;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.UnrecoverableKeyException;
+import java.util.List;
 
 public class KeystoreUtils {
     public static final String KSTYPE_EXT_JKS = "jks";
@@ -12,10 +23,20 @@ public class KeystoreUtils {
 
     private static final Log log = LogFactory.getLog(KeystoreUtils.class);
 
-    public static StoreFormat findKeystoreType(String filename) {
-        return findKeystoreTypeByExtension(filename);
+    public static StoreFormat findKeystoreType(String filename) throws UnknownKeystoreTypeException {
+        StoreFormat format = KeystoreUtils.findKeystoreTypeByExtension(filename);
+        if (StoreFormat.UNKNOWN.equals(format) && Files.exists(Paths.get(filename))) {
+            format= findKeystoreTypeByContent(filename);
+            if (StoreFormat.UNKNOWN.equals(format)){
+                throw new UnknownKeystoreTypeException("Keystore type unknown: "+filename);
+            }
+        }
+
+        return format;
+
     }
-        public static StoreFormat findKeystoreTypeByExtension(String filename) {
+
+    public static StoreFormat findKeystoreTypeByExtension(String filename) {
 
         log.debug("finding type of file...");
         try {
@@ -43,5 +64,46 @@ public class KeystoreUtils {
         } catch (IndexOutOfBoundsException e) {
             return StoreFormat.UNKNOWN;
         }
+    }
+
+    public static StoreFormat findKeystoreTypeByContent(String filename) {
+        log.debug("finding type of file...");
+        MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
+        try {
+            mkKeystore.load(filename, "".toCharArray());
+        } catch (RepositoryException e) {
+            if (NestedExceptionUtils.getMostSpecificCause(e) instanceof UnrecoverableKeyException
+                    && e.getMessage().contains("Password verification failed")) {
+                System.out.println("key");
+                return StoreFormat.JKS;
+            }
+        } catch (IOException e) {
+
+        }
+        mkKeystore = MkKeystore.getInstance(StoreFormat.PKCS12);
+        try {
+            mkKeystore.load(filename, "".toCharArray());
+        } catch (RepositoryException e) {
+            Throwable rootException = NestedExceptionUtils.getMostSpecificCause(e);
+            if (rootException instanceof IOException
+                    && rootException.getMessage().contains("wrong password") && rootException.getMessage().contains("PKCS12")) {
+                return StoreFormat.PKCS12;
+            }
+        } catch (IOException e) {
+
+        }
+        mkKeystore = MkKeystore.getInstance(StoreFormat.PEM);
+        try {
+            MKKeystoreValue storeValue = mkKeystore.load(filename, "".toCharArray());
+            List<CryptoObject> objects = ((PemKeystoreRepository) mkKeystore).getElements(storeValue);
+            if (objects != null && !objects.isEmpty())
+                return StoreFormat.PEM;
+        } catch (RepositoryException e) {
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+        }
+        return StoreFormat.UNKNOWN;
     }
 }

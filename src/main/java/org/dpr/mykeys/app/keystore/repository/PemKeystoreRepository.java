@@ -15,7 +15,7 @@ import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.dpr.mykeys.app.PrivateKeyValue;
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.certificate.CryptoObject;
+import org.dpr.mykeys.app.CryptoObject;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.ServiceException;
 
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PemKeystoreRepository extends AbstractSimpleKeystoreRepository {
+public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository {
 
 
     private static final Log log = LogFactory.getLog(PemKeystoreRepository.class);

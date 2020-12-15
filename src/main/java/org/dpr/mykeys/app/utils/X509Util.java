@@ -94,25 +94,6 @@ public class X509Util {
 
     }
 
-    public static ASN1Encodable getPolicy(X509Certificate cert, PolicyQualifierId id) {
-        ASN1Encodable policy = null;
-        PolicyInformation[] policyInformation = getPolicies(cert);
-        if (policyInformation != null) {
-            for (PolicyInformation pInfo : policyInformation) {
-                ASN1Sequence policyQualifiers = null;
-                try {
-                    policyQualifiers = (ASN1Sequence) pInfo.getPolicyQualifiers().getObjectAt(0);
-                } catch (Exception e) {
-                    Object o = pInfo.getPolicyQualifiers().getObjectAt(0);
-                    id.toString().equals(o.toString());
-                }
-                if (id.equals(policyQualifiers.getObjectAt(0)))
-                    return policyQualifiers.getObjectAt(1);
-            }
-        }
-        return policy;
-    }
-
     public static Map<ASN1ObjectIdentifier, String> getSubjectMap(X509Certificate x509Certificate) {
         X500Principal x500Principal = x509Certificate.getSubjectX500Principal();
         return getInfosMap(x500Principal);

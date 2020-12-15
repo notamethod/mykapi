@@ -1,10 +1,11 @@
 package org.dpr.mykeys.app.keystore;
 
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.certificate.CryptoObject;
+import org.dpr.mykeys.app.CryptoObject;
 
 import java.util.List;
 
+//FIXME
 public interface MKKeystoreValue {
 
     List<Certificate> getCertificates();

@@ -3,7 +3,7 @@ package org.dpr.mykeys.app.keystore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dpr.mykeys.app.*;
-import org.dpr.mykeys.app.certificate.CryptoObject;
+import org.dpr.mykeys.app.CryptoObject;
 import org.dpr.mykeys.app.keystore.repository.EntityAlreadyExistsException;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.keystore.repository.PemKeystoreRepository;
@@ -139,7 +139,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     }
 
     public ActionStatus importCertificates(KeyStoreValue ksin, char[] newPwd)
-            throws ServiceException {
+            throws ServiceException, UnknownKeystoreTypeException {
         ksin.setStoreFormat(KeystoreUtils.findKeystoreType(ksin.getPath()));
         if (ksin.getPassword() == null && (StoreFormat.JKS.equals(ksin.getStoreFormat()) || StoreFormat.PKCS12.equals(ksin.getStoreFormat()))) {
             return ActionStatus.ASK_PASSWORD;
@@ -217,7 +217,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     }
 
     @Deprecated
-    public List<Certificate> getCertificates() throws ServiceException {
+    public List<Certificate> getCertificates() throws ServiceException, UnknownKeystoreTypeException {
         List<Certificate> certs = new ArrayList<>();
 
         if (ksInfo.getPassword() == null && ksInfo.getStoreFormat().equals(StoreFormat.PKCS12)) {
@@ -261,8 +261,12 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     @Override
     public List<Certificate> getChildList() throws ServiceException {
 
-        List<Certificate> certs;
-        certs = getCertificates();
+        List<Certificate> certs = null;
+        try {
+            certs = getCertificates();
+        } catch (UnknownKeystoreTypeException e) {
+            throw new ServiceException("Error getting child list",e);
+        }
         log.debug("get child list" + certs.size());
         return certs;
     }
@@ -466,7 +470,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     }
 
     public KeyStore importStore(String path, StoreFormat storeFormat, char[] password) throws
-            ServiceException {
+            ServiceException, UnknownKeystoreTypeException {
         if (storeFormat == null)
             storeFormat = KeystoreUtils.findKeystoreType(path);
         // TODO Auto-generated method stub
@@ -638,7 +642,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
     }
 
 
-    public KeyStoreValue createKeyStoreValue(File ksFile) {
+    public KeyStoreValue createKeyStoreValue(File ksFile) throws UnknownKeystoreTypeException {
         StoreFormat format = KeystoreUtils.findKeystoreType(ksFile.getAbsolutePath());
         return new KeyStoreValue(ksFile, format, null);
     }
@@ -655,7 +659,7 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         }
 
         Map<String, String> certsAC = certs.stream().
-                filter(cert -> CertificateType.AC.equals(cert.getType())).
+                filter(cert -> CertificateType.AC.equals(cert.getCertificaType())).
                 collect(
                         toMap(Certificate::getName,
                                 Certificate::getAlias,
@@ -708,7 +712,12 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         return certsRetour;
 
     }
-
+    /**
+     * use keystoreutils
+     * @param filename
+     * @return
+     */
+    @Deprecated
     public StoreFormat findKeystoreType(String filename) {
         StoreFormat format = KeystoreUtils.findKeystoreTypeByExtension(filename);
         if (StoreFormat.UNKNOWN.equals(format)){
@@ -716,6 +725,13 @@ public class KeyStoreHelper implements StoreService<KeyStoreValue> {
         }
         return format;
     }
+
+    /**
+     * use keystoreutils
+     * @param filename
+     * @return
+     */
+    @Deprecated
     public StoreFormat findKeystoreTypeByContent(String filename) {
         log.debug("finding type of file...");
         MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);

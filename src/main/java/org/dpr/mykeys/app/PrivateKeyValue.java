@@ -1,13 +1,11 @@
 package org.dpr.mykeys.app;
 
-import org.dpr.mykeys.app.certificate.CryptoObject;
-
 import java.security.PrivateKey;
 
 
 public class PrivateKeyValue implements CryptoObject {
     private PrivateKey privateKey;
-
+    private String envelop;
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
@@ -17,5 +15,30 @@ public class PrivateKeyValue implements CryptoObject {
     }
 
     public PrivateKeyValue(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    @Override
+    public byte[] getEncoded() {
+        return privateKey.getEncoded();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.PRIVATE_KEY;
+    }
+
+    @Override
+    public char[] getPassword() {
+        return new char[0];
+    }
+
+    @Override
+    public String getHumanIdentifier() {
+        return privateKey.getFormat();
+    }
+
+    public void setEnvelop(String pkcs8) {
+        this.envelop=envelop;
     }
 }

@@ -12,7 +12,7 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class KeystoreRepository implements MkKeystore {
+public abstract class AbstractKeystoreRepository implements MkKeystore {
 
     StoreFormat format;
 

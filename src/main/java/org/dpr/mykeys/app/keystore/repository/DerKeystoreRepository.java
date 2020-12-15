@@ -15,7 +15,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-class DerKeystoreRepository extends AbstractSimpleKeystoreRepository implements MkKeystore {
+class DerKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository implements MkKeystore {
 
     private static final Log log = LogFactory.getLog(DerKeystoreRepository.class);
 

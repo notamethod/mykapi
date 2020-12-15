@@ -12,9 +12,9 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.util.List;
 
-public abstract class AbstractSimpleKeystoreRepository extends KeystoreRepository {
+public abstract class AbstractSimpleAbstractKeystoreRepository extends AbstractKeystoreRepository {
 
-    private static final Log log = LogFactory.getLog(AbstractSimpleKeystoreRepository.class);
+    private static final Log log = LogFactory.getLog(AbstractSimpleAbstractKeystoreRepository.class);
 
     public MKKeystoreValue create(String name, char[] password) throws RepositoryException, IOException {
 

@@ -1,6 +1,6 @@
 package org.dpr.mykeys.test;
 
-class KSConfigTestTmp {
+public class KSConfigTestTmp {
 
 	public static void initResourceBundle() {
 		// TODO Auto-generated method stub

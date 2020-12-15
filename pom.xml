@@ -4,7 +4,7 @@
 
     <groupId>com.notamethod</groupId>
 
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
 
 
     <artifactId>mykeys-api</artifactId>
@@ -12,6 +12,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.6.1</junit.version>
         <bc.version>1.65</bc.version>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!-- Organization and project keys are displayed in the right sidebar of the project homepage -->
+        <sonar.organization>notamethod</sonar.organization>
+        <sonar.projectKey>mykapi</sonar.projectKey>
     </properties>
 
     <dependencies>
