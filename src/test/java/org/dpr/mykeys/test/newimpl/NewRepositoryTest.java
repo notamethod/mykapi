@@ -42,7 +42,7 @@ public class NewRepositoryTest {
         PemRepository pem = null;
         try {
             pem = new PemRepository(null);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
            //ok
         }
         pem = new PemRepository(Paths.get("c:/tmp/dumb"));

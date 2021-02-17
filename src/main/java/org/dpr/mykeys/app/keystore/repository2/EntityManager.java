@@ -17,13 +17,24 @@ public class EntityManager
     private boolean autoCommit=true;
     File file;
     CryptoRepository repository;
-    public EntityManager(@NotNull String fileName) throws RepositoryException {
+
+    public EntityManager(@NotNull  String fileName) throws RepositoryException {
+        this(fileName, null, null);
+    }
+    public EntityManager(@NotNull String fileName, char[] pass) throws RepositoryException {
+        this(fileName, pass, null);
+    }
+    public EntityManager(@NotNull String fileName, char[] pass, StoreFormat givenFormat) throws RepositoryException {
         Path file= Paths.get(fileName);
         StoreFormat format = null;
-        try {
-            format = KeystoreUtils.findKeystoreType(fileName);
-        } catch (UnknownKeystoreTypeException e) {
-            throw new RepositoryException("Error getting child list",e);
+        if (givenFormat == null) {
+            try {
+                format = KeystoreUtils.findKeystoreType(fileName);
+            } catch (UnknownKeystoreTypeException e) {
+                throw new RepositoryException("Error getting child list", e);
+            }
+        }else{
+            format = givenFormat;
         }
         switch (format) {
             case PEM:
@@ -33,10 +44,10 @@ public class EntityManager
                 repository= new DerRepository(file);
                 break;
             case PKCS12:
-                repository= new VanillaRepository(file);
+                repository= new JavaRepository(file, StoreFormat.PKCS12, pass, false);
                 break;
             case JKS:
-                repository= new JKSRepository(file);
+                repository= new JavaRepository(file,StoreFormat.JKS, pass, true);
                 break;
             default:
                 repository= new VanillaRepository(file);

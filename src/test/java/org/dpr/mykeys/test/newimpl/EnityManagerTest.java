@@ -43,7 +43,7 @@ public class EnityManagerTest {
         EntityManager manager = null;
         try {
             manager = new EntityManager(null);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
            //ok
         }
 

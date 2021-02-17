@@ -51,12 +51,12 @@ public class PoliciesUtil {
                 for (PolicyInformation pInfo : policyInformation) {
                     ASN1Sequence policyQualifiers = pInfo.getPolicyQualifiers();
                     if (policyQualifiers != null) {
-                        policyQualifiers.forEach(name -> log.debug("policyQualifier: " + name));
+                        policyQualifiers.forEach(name -> log.trace("policyQualifier: " + name));
                         for (int i = 0; i < policyQualifiers.size(); i++) {
                             ASN1Sequence pol = (ASN1Sequence) policyQualifiers.getObjectAt(i);
                             for (int j = 0; j < pol.size(); j++) {
                                 returnPolicies.put(getName(pol), pol.getObjectAt(j).toString());
-                                log.debug("pol: " + getName(pol) + " " + pol.getObjectAt(j));
+                                log.trace("pol: " + getName(pol) + " " + pol.getObjectAt(j));
                             }
                         }
                     }
@@ -65,7 +65,7 @@ public class PoliciesUtil {
                     String name = getName(policyId);
                     returnPolicies.put(name, null);
                     k++;
-                    log.debug("Polycy ID: " + name);
+                    log.trace("Polycy ID: " + name);
                 }
             }
         }

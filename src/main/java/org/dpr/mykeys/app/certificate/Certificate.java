@@ -430,8 +430,8 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
                 //String type = RFC4519Style.INSTANCE.oidToDisplayName(atrs[i].getType());
                 String type = BCStyle.INSTANCE.oidToDisplayName(atr.getType());
 
-                if (log.isDebugEnabled()) {
-                    log.debug(type + ":" + val);
+                if (log.isTraceEnabled()) {
+                    log.trace(type + ":" + val);
 
 
                 }
@@ -463,8 +463,8 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
                 //String type = RFC4519Style.INSTANCE.oidToDisplayName(atrs[i].getType());
                 String type = BCStyle.INSTANCE.oidToDisplayName(atr.getType());
 
-                if (log.isDebugEnabled()) {
-                    log.debug(type + ":" + val);
+                if (log.isTraceEnabled()) {
+                    log.trace(type + ":" + val);
 
 
                 }
