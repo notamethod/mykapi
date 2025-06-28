@@ -1,8 +1,8 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -11,27 +11,23 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
-import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObject;
-import org.dpr.mykeys.app.PrivateKeyValue;
+import org.dpr.mykeys.app.common.PrivateKeyValue;
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.*;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 
 import java.io.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository {
 
 
-    private static final Log log = LogFactory.getLog(PemKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(PemKeystoreRepository.class);
 
     private Map<String, Object> elements = new HashMap<>();
 
@@ -48,11 +44,9 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
         else {
             SimpleKeystoreValue simpleKeystoreValue = (SimpleKeystoreValue) ksValue;
             if (!simpleKeystoreValue.isLoaded()) {
-                try {
+
                     simpleKeystoreValue = (SimpleKeystoreValue) load(simpleKeystoreValue.getPath(), null);
-                } catch (IOException e) {
-                    throw new RepositoryException(e);
-                }
+
             }
             List<Certificate> certs = simpleKeystoreValue.getElements().stream()
                     .filter(obj -> obj instanceof Certificate)
@@ -69,17 +63,15 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
 
         SimpleKeystoreValue simpleKeystoreValue = (SimpleKeystoreValue) ksValue;
         if (!simpleKeystoreValue.isLoaded()) {
-            try {
+
                 simpleKeystoreValue = (SimpleKeystoreValue) load(simpleKeystoreValue.getPath(), null);
-            } catch (IOException e) {
-                throw new RepositoryException(e);
-            }
+
         }
         List<PrivateKey> keys = new ArrayList<>();
         final JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
         for (Object object : simpleKeystoreValue.getElements()) {
             if (object instanceof PrivateKeyInfo) {
-                PrivateKey privateKey = null;
+                PrivateKey privateKey;
                 try {
                     PrivateKeyInfo pki = (PrivateKeyInfo) object;
                     privateKey = jcaPEMKeyConverter.getPrivateKey(pki);
@@ -110,7 +102,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
 
             while ((object = reader.readObject()) != null) {
                 if (object instanceof PrivateKeyInfo) {
-                    PrivateKey privateKey = null;
+                    PrivateKey privateKey;
                     try {
                         PrivateKeyInfo pki = (PrivateKeyInfo) object;
                         privateKey = jcaPEMKeyConverter.getPrivateKey(pki);
@@ -122,7 +114,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
                     }
 
                 } else if (object instanceof X509CertificateHolder) {
-                    X509Certificate cert = null;
+                    X509Certificate cert;
                     try {
                         cert = new JcaX509CertificateConverter().setProvider("BC")
                                 .getCertificate((X509CertificateHolder) object);
@@ -185,7 +177,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
         try (FileOutputStream fout = new FileOutputStream(f)) {
             List<byte[]> encodedList = new ArrayList<>();
             for (Certificate certInfo : ksValue.getCertificates()) {
-                encodedList.add(certInfo.getCertificate().getEncoded());
+                encodedList.add(certInfo.getX509Certificate().getEncoded());
             }
             saveBytes(encodedList, fout, PEMType.CERTIFICATE);
         } catch (Exception e) {
@@ -225,7 +217,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
     public void exportPrivateKeyBC(PrivateKey privateKey, OutputStream os, char[] pass)
             throws ServiceException {
         //unencrypted form of PKCS#8 file
-        JcaPKCS8Generator gen1 = null;
+        JcaPKCS8Generator gen1;
         try {
             gen1 = new JcaPKCS8Generator(privateKey, null);
             PemObject obj1 = gen1.generate();
@@ -258,8 +250,6 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
 //            fos2.write(pkcs8Key2.getBytes());
 //            fos2.flush();
 //            fos2.close();
-        } catch (PemGenerationException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -297,7 +287,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
 
         PrintWriter osw = new PrintWriter(os);
         for (byte[] encoded : encodedObjects) {
-            byte[] base64Encoded = Base64.encodeBase64(encoded);
+            byte[] base64Encoded = Base64.getEncoder().encode(encoded);
             osw.println(pemType.Begin());
             String[] datas = new String(base64Encoded).split("(?<=\\G.{64})");
             for (String line : datas) {
@@ -314,7 +304,7 @@ public class PemKeystoreRepository extends AbstractSimpleAbstractKeystoreReposit
     }
 
     @Override
-    public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
+    public MKKeystoreValue load(String name, char[] password) throws RepositoryException{
         SimpleKeystoreValue keystoreValue = new SimpleKeystoreValue(name, this.format);
         List<CryptoObject> elements = getElements(keystoreValue);
         keystoreValue.addAllElements(elements);

@@ -40,8 +40,6 @@ public class CertificateTemplate implements MkCertificate<CertificateTemplate> {
 
             this.name = FilenameUtils.getBaseName(path.getFileName().toString());
             this.path = path;
-        } finally {
-
         }
 
     }

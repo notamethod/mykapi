@@ -1,7 +1,5 @@
 package org.dpr.mykeys.app.utils;
 
-import org.dpr.mykeys.app.X509Constants;
-
 import java.io.*;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -13,6 +11,7 @@ import java.util.*;
 public class CertificateUtils {
 
     Map<Integer, String> mapKeyUSage = new HashMap<>();
+    private static SecureRandom secureRandom = new SecureRandom();
 
     public static String keyUsageToString(boolean[] keyUsage) {
         StringBuilder value = new StringBuilder();
@@ -63,12 +62,10 @@ public class CertificateUtils {
     /**
      * get a random BigInteger
      *
-     * @param numBits
+     * @param numBits maximum bitLength of the new BigInteger
      * @return
      */
     public static BigInteger randomBigInteger(int numBits) {
-        SecureRandom random = new SecureRandom();
-        return new BigInteger(numBits, random);
-
+        return new BigInteger(numBits, secureRandom);
     }
 }

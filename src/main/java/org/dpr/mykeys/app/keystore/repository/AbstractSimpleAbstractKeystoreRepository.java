@@ -1,7 +1,9 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.*;
 
@@ -14,7 +16,7 @@ import java.util.List;
 
 public abstract class AbstractSimpleAbstractKeystoreRepository extends AbstractKeystoreRepository {
 
-    private static final Log log = LogFactory.getLog(AbstractSimpleAbstractKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(AbstractSimpleAbstractKeystoreRepository.class);
 
     public MKKeystoreValue create(String name, char[] password) throws RepositoryException, IOException {
 
@@ -29,9 +31,7 @@ public abstract class AbstractSimpleAbstractKeystoreRepository extends AbstractK
            throw new RepositoryException(e);
         }
 
-        MKKeystoreValue keyStoreValue = new SimpleKeystoreValue(name,  format);
-
-        return keyStoreValue;
+        return new SimpleKeystoreValue(name,  format);
     }
 
     @Override
@@ -41,7 +41,7 @@ public abstract class AbstractSimpleAbstractKeystoreRepository extends AbstractK
     }
 
     @Override
-    public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
+    public MKKeystoreValue load(String name, char[] password) throws RepositoryException {
         MKKeystoreValue keystoreValue = new SimpleKeystoreValue(name, this.format);
         keystoreValue.setCertificates(getCertificates(keystoreValue));
         keystoreValue.setLoaded(true);

@@ -1,11 +1,11 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.utils;
 
 
 import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+
 
 /**
  * Utilities from dragndrop features
@@ -45,7 +45,7 @@ public class PkiTools {
         static TypeObject get(String value) {
             TypeObject[] types = TypeObject.values();
             for (TypeObject type : types) {
-                if (StringUtils.equals(type.getValue(), value)) {
+                if (type.getValue().equals(value)) {
                     return type;
                 }
             }

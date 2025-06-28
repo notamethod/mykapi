@@ -1,24 +1,22 @@
 package org.dpr.mykeys.app.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class BCUtil {
 
-    protected static final Log log = LogFactory.getLog(BCUtil.class);
+    protected static final Logger log = LogManager.getLogger(BCUtil.class);
 
+    private BCUtil(){
+       throw new IllegalStateException("Utility class");
+    }
 
-    public static final Map<ASN1ObjectIdentifier, String> extendedKeyUsages = new HashMap() {{
-        put(KeyPurposeId.id_kp_clientAuth, "eku.clientAuth");
-        put(KeyPurposeId.id_kp_codeSigning, "eku.codeSigning");
-        put(KeyPurposeId.id_kp_serverAuth, "eku.serverAuth");
-
-    }};
-
-
+    static Map<KeyPurposeId, String> extendedKeyUsages = Map.of(
+            KeyPurposeId.id_kp_clientAuth, "eku.clientAuth",
+            KeyPurposeId.id_kp_codeSigning, "eku.codeSigning",
+            KeyPurposeId.id_kp_serverAuth, "eku.serverAuth");
 }

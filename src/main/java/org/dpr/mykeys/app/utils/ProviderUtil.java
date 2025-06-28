@@ -1,7 +1,9 @@
 package org.dpr.mykeys.app.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Provider;
@@ -11,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ProviderUtil {
-    private final static Log log = LogFactory.getLog(ProviderUtil.class);
+    private final static Logger log = LogManager.getLogger(ProviderUtil.class);
     public static List<String> SignatureList;
     public static Provider provider;
     private static List<String> KeyPairGeneratorList;

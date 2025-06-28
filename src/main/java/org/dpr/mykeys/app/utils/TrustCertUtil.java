@@ -22,22 +22,15 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -47,7 +40,7 @@ class TrustCertUtil {
 
     private static final String FILTRE_CERTIFICAT_X509 = "*.CER";
     private static final String X509_CERTIFICATE_TYPE = "X.509";
-    private static final Log log = LogFactory.getLog(TrustCertUtil.class);
+    private static final Logger log = LogManager.getLogger(TrustCertUtil.class);
 
     /**
      * .
@@ -114,15 +107,14 @@ class TrustCertUtil {
 
         Set<X509Certificate> certs = listerCertificats(srcPath, typeCert,
                 provider);
-        try {
-            InputStream certStream = new FileInputStream(destFile);
+        try( InputStream certStream = new FileInputStream(destFile)) {
+
             // remarque: un fichier .cer peut contenir plus d'un certificat
             Collection<X509Certificate> trustedCerts2 = chargerCertificatsX509(
                     certStream, typeCert, provider);
-            IOUtils.closeQuietly(certStream);
             certs.addAll(trustedCerts2);
         } catch (IOException ioe) {
-            // fichier vide
+            // empty file
         }
 
         try (OutputStream output = new FileOutputStream(destFile)) {
@@ -224,13 +216,13 @@ class TrustCertUtil {
         Collection<File> lstFichiers = FileUtils.listFiles(new File(
                 aCertificatesDirectory), fileFilter, dirFilter);
 
-        // boucle sur les certificats trouvés
         for (File fichier : lstFichiers) {
-            InputStream certStream = new FileInputStream(fichier);
-            // remarque: un fichier .cer peut contenir plus d'un certificat
-            Collection<X509Certificate> trustedCerts = chargerCertificatsX509(
-                    certStream, typeCert, provider);
-            IOUtils.closeQuietly(certStream);
+            Collection<X509Certificate> trustedCerts;
+            try (InputStream certStream = new FileInputStream(fichier)) {
+                // a file can contains more than one certificate
+                trustedCerts = chargerCertificatsX509(
+                        certStream, typeCert, provider);
+            }
             lstCert.addAll(trustedCerts);
         }
         return new HashSet<>(
@@ -333,11 +325,8 @@ class TrustCertUtil {
      */
     public static X509Certificate[] getDefaultTrustedCerts(String subPath) {
         String javaHome = System.getProperty("java.home");
-        File f = null;
-        if (subPath == null)
-            f = new File(javaHome, "jre/lib/security/cacerts");
-        else
-            f = new File(javaHome, subPath);
+        File f;
+        f = new File(javaHome, Objects.requireNonNullElse(subPath, "jre/lib/security/cacerts"));
         try (FileInputStream is = new FileInputStream(f)) {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 

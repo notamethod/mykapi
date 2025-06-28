@@ -1,4 +1,6 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.common;
+
+import org.dpr.mykeys.app.common.CryptoObject;
 
 import java.security.PrivateKey;
 
@@ -39,6 +41,6 @@ public class PrivateKeyValue implements CryptoObject {
     }
 
     public void setEnvelop(String pkcs8) {
-        this.envelop=envelop;
+        this.envelop=pkcs8;
     }
 }

@@ -1,9 +1,10 @@
 package org.dpr.mykeys.app.keystore;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.KeyToolsException;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dpr.mykeys.app.StringUtils;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.utils.CertificateUtils;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public class KeystoreBuilder {
 
 
-    public static final Log log = LogFactory.getLog(KeystoreBuilder.class);
+    public static final Logger log = LogManager.getLogger(KeystoreBuilder.class);
     private final KeyStore keystore;
 
     public KeystoreBuilder(KeyStore keystore) {
@@ -53,7 +54,7 @@ public class KeystoreBuilder {
             throw new IOException("File already exists " + path.toString());
         }
         keystore.load(null, password);
-        OutputStream fos = new FileOutputStream(new File(name));
+        OutputStream fos = new FileOutputStream(name);
         keystore.store(fos, password);
         fos.close();
 
@@ -89,15 +90,12 @@ public class KeystoreBuilder {
             certInfo.setAlias(bi.toString(16));
         }
         try {
-            // pas bonne chaine
-            // X509Certificate x509Cert = (X509Certificate) cert;
-
             if (certInfo.getPrivateKey() == null) {
-                keystore.setCertificateEntry(certInfo.getAlias(), certInfo.getCertificate());
+                keystore.setCertificateEntry(certInfo.getAlias(), certInfo.getX509Certificate());
             } else {
                 java.security.cert.Certificate[] chaine = certInfo.getCertificateChain();
                 if (chaine == null)
-                    chaine = new java.security.cert.Certificate[]{certInfo.getCertificate()};
+                    chaine = new java.security.cert.Certificate[]{certInfo.getX509Certificate()};
                 keystore.setKeyEntry(certInfo.getAlias(), certInfo.getPrivateKey(), certInfo.getPassword(), chaine);
             }
 
@@ -111,7 +109,7 @@ public class KeystoreBuilder {
 
     protected void saveKeyStore(KeyStore ks, KeyStoreValue ksInfo) throws KeyToolsException {
         log.debug("saveKeyStore ");
-        try (OutputStream fos = new FileOutputStream(new File(ksInfo.getPath()))) {
+        try (OutputStream fos = new FileOutputStream(ksInfo.getPath())) {
             ks.store(fos, ksInfo.getPassword());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             throw new KeyToolsException("Echec de sauvegarde du magasin impossible:" + ksInfo.getPath(), e);

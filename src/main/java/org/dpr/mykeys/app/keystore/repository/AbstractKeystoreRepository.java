@@ -2,7 +2,7 @@ package org.dpr.mykeys.app.keystore.repository;
 
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 

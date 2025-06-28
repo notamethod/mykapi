@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.utils;
 
 public class ServiceException extends Exception {
 

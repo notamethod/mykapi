@@ -75,3 +75,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 /mykeys-core/testgitignore.txt
+/.idea/sonarlint/issuestore/

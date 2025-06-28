@@ -1,8 +1,9 @@
 package org.dpr.mykeys.app.certificate;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -15,8 +16,8 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.dpr.mykeys.app.KeyUsages;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.KeyUsages;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.utils.ProviderUtil;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import static org.dpr.mykeys.app.utils.CertificateUtils.randomBigInteger;
 
 class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
-    private final Log log = LogFactory.getLog(CertificateGeneratorStandard.class);
+    private final Logger log = LogManager.getLogger(CertificateGeneratorStandard.class);
     private static final int AUTH_VALIDITY = 999;
 
     public CertificateGeneratorStandard() {
@@ -56,7 +57,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
         // SerialNumber
         BigInteger serial = randomBigInteger(30);
-        if (StringUtils.isBlank(certModel.getAlias())) {
+        if (null == certModel.getAlias() || certModel.getAlias().isBlank()) {
             certModel.setAlias(serial.toString(16));
         }
 
@@ -64,10 +65,10 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
         //issuer
         X500Name issuerDN;
-        if (certIssuer != null && certIssuer.getCertificate() != null) {
+        if (certIssuer != null && certIssuer.getX509Certificate() != null) {
             log.info("certificate generated from issuer..." + certIssuer.getName());
 
-            issuerDN = X500Name.getInstance(certIssuer.getCertificate().getSubjectX500Principal().getEncoded());
+            issuerDN = X500Name.getInstance(certIssuer.getX509Certificate().getSubjectX500Principal().getEncoded());
         } else {
             issuerDN = subject;
         }
@@ -81,15 +82,14 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
         certGen.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(keypair.getPublic()));
 
         // FIXME: à vérifier en cas de auto signé
-        if (certIssuer != null && certIssuer.getCertificate() != null) {
-            certGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(certIssuer.getCertificate()));
+        if (certIssuer != null && certIssuer.getX509Certificate() != null) {
+            certGen.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(certIssuer.getX509Certificate()));
         } else {
             certGen.addExtension(Extension.authorityKeyIdentifier, false,
                     extUtils.createAuthorityKeyIdentifier(keypair.getPublic()));
         }
 
-
-        if (StringUtils.isNotBlank(certModel.getPolicyCPS())) {
+        if (null != certModel.getPolicyCPS() && !certModel.getPolicyCPS().isBlank()) {
             ASN1EncodableVector qualifiers = getPolicyInformation(certModel.getPolicyID(), certModel.getPolicyCPS(), certModel.getPolicyNotice());
             certGen.addExtension(Extension.certificatePolicies, false, new DERSequence(qualifiers));
 
@@ -139,7 +139,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
         cert.verify(pubKey);
 
-        X509Certificate[] certChain = null;
+        X509Certificate[] certChain;
         // FIXME: gérer la chaine de l'émetteur
         if (certIssuer != null && certIssuer.getCertificateChain() != null) {
             log.info("adding issuer " + certIssuer.getName() + "'s certicate chain to certificate");
@@ -148,11 +148,11 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
                     certIssuer.getCertificateChain().length);
             certChain[0] = cert;
             // certChain[1] = certIssuer.getCertificate();
-        } else if (certIssuer != null && certIssuer.getCertificate() != null) {
+        } else if (certIssuer != null && certIssuer.getX509Certificate() != null) {
             log.error("FIXME");
             certChain = new X509Certificate[2];
             certChain[0] = cert;
-            certChain[1] = certIssuer.getCertificate();
+            certChain[1] = certIssuer.getX509Certificate();
         } else {
             certChain = new X509Certificate[]{cert};
         }
@@ -169,13 +169,12 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
 
         ASN1EncodableVector qualifiers = new ASN1EncodableVector();
 
-        if (!StringUtils.isEmpty(unotice)) {
+        if (unotice!= null && !unotice.isBlank()) {
             UserNotice un = new UserNotice(null, new DisplayText(DisplayText.CONTENT_TYPE_UTF8STRING, unotice));
             PolicyQualifierInfo pqiUNOTICE = new PolicyQualifierInfo(PolicyQualifierId.id_qt_unotice, un);
             qualifiers.add(pqiUNOTICE);
         }
-        if (!StringUtils.isEmpty(cps)) {
-
+        if (cps!= null && !cps.isBlank()) {
             PolicyQualifierInfo pqiCPS = new PolicyQualifierInfo(cps);
             PolicyInformation pi = new PolicyInformation(PolicyQualifierId.id_qt_cps,
                     new DERSequence(pqiCPS));
@@ -200,7 +199,7 @@ class CertificateGeneratorStandard implements CertificateGeneratorExtensions {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(subject, serial, from, to, subject,
                 keypair.getPublic());
 
-        Certificate value = null;
+        Certificate value;
         try {
             ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keypair.getPrivate());
             X509CertificateHolder certHolder = builder.build(signer);

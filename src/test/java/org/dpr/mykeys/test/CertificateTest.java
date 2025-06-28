@@ -1,12 +1,14 @@
 package org.dpr.mykeys.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.dpr.mykeys.app.CertificateType;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.certificate.CertificateType;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.certificate.CSRManager;
 import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.certificate.Certificate;
@@ -32,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CertificateTest {
 
-    private final static Log log = LogFactory.getLog(CertificateTest.class);
+    private final static Logger log = LogManager.getLogger(CertificateTest.class);
 
     private static final String AC_NAME = "mykeys root ca 2";
 

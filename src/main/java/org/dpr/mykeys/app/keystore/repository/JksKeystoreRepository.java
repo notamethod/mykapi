@@ -1,8 +1,10 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.KeyToolsException;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dpr.mykeys.app.keystore.KeyToolsException;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
@@ -14,14 +16,13 @@ import java.util.List;
 
 class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
-    private static final Log log = LogFactory.getLog(JksKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(JksKeystoreRepository.class);
 
     //protected final StoreFormat format = StoreFormat.JKS;
 
     public JksKeystoreRepository() {
         this.format = StoreFormat.JKS;
     }
-
 
 
     @Override
@@ -64,7 +65,7 @@ class JksKeystoreRepository extends AbstractJavaKeystoreRepository {
 
         try {
             ks.aliases();
-            OutputStream fos = new FileOutputStream(new File(path));
+            OutputStream fos = new FileOutputStream(path);
             ks.store(fos, password);
             fos.close();
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {

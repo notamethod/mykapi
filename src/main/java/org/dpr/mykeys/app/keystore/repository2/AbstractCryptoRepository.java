@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.keystore.repository2;
 
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public abstract class AbstractCryptoRepository implements CryptoRepository{
 
 
     @Override
-    public List findAll() throws RepositoryException {
+    public List findAll() {
         return cryptoObjects;
     }
 
@@ -34,7 +34,7 @@ public abstract class AbstractCryptoRepository implements CryptoRepository{
 
 
     @Override
-    public Iterable findAllById(Iterable iterable) {
+    public Iterable<CryptoObject> findAllById(Iterable iterable) {
         return null;
     }
 

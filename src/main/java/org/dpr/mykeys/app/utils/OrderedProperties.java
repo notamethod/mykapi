@@ -1,19 +1,7 @@
 package org.dpr.mykeys.app.utils;
 
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -55,6 +43,7 @@ import java.util.Vector;
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "RedundantSuppression"})
 public final class OrderedProperties implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private transient Map<String, String> properties;

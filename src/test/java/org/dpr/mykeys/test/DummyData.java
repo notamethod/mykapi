@@ -1,8 +1,8 @@
 package org.dpr.mykeys.test;
 
-import org.dpr.mykeys.app.CertificateType;
-import org.dpr.mykeys.app.PrivateKeyValue;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.certificate.CertificateType;
+import org.dpr.mykeys.app.common.PrivateKeyValue;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.certificate.CertificateManager;
 
@@ -72,7 +72,7 @@ public class DummyData {
             KeyPair keyPair = certificateManager.generateKeyPair("RSA", 2048);
             pk=keyPair.getPrivate();
         } catch (ServiceException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         PrivateKeyValue pkv = new PrivateKeyValue(pk);

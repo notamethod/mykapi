@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
@@ -15,22 +15,18 @@ import java.util.List;
 public interface MkKeystore {
 
     static MkKeystore getInstance(StoreFormat format) {
-        switch (format) {
-            case PEM:
-                return new PemKeystoreRepository();
-            case DER:
-                return new DerKeystoreRepository();
-            case PKCS12:
-                return new Pkcs12KeystoreRepository();
-            case JKS:
-            default:
-                return new JksKeystoreRepository();
-        }
+        return
+                switch (format) {
+                    case PEM -> new PemKeystoreRepository();
+                    case DER -> new DerKeystoreRepository();
+                    case PKCS12 -> new Pkcs12KeystoreRepository();
+                    default -> new JksKeystoreRepository();
+                };
     }
 
-    MKKeystoreValue create(String name, char[] password)  throws RepositoryException, IOException;
+    MKKeystoreValue create(String name, char[] password) throws RepositoryException, IOException;
 
-    MKKeystoreValue load(String name, char[] password)  throws RepositoryException, IOException;
+    MKKeystoreValue load(String name, char[] password) throws RepositoryException;
 
     void removeCertificates(KeyStoreValue ksValue, List<Certificate> certificatesInfo) throws
             RepositoryException;
@@ -50,9 +46,9 @@ public interface MkKeystore {
     List<Certificate> getCertificates(MKKeystoreValue ksValue)
             throws RepositoryException;
 
-    void addCert(KeyStoreValue ki, Certificate certificate) throws  RepositoryException;
+    void addCert(KeyStoreValue ki, Certificate certificate) throws RepositoryException;
 
-    void addCertificates(MKKeystoreValue ki, List<Certificate> certificates) throws  RepositoryException;
+    void addCertificates(MKKeystoreValue ki, List<Certificate> certificates) throws RepositoryException;
 
     void save(MKKeystoreValue ksValue, SAVE_OPTION option) throws RepositoryException;
 
@@ -60,7 +56,7 @@ public interface MkKeystore {
 
     void saveCSR(byte[] b, OutputStream os, SAVE_OPTION option) throws ServiceException;
 
-     PrivateKey getPrivateKey(MKKeystoreValue mksValue, String alias, char[] password) throws
+    PrivateKey getPrivateKey(MKKeystoreValue mksValue, String alias, char[] password) throws
             RepositoryException;
 
     enum SAVE_OPTION {

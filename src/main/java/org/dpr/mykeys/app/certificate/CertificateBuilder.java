@@ -1,8 +1,10 @@
 package org.dpr.mykeys.app.certificate;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -15,7 +17,8 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.StringUtils;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.utils.ProviderUtil;
 
 import java.io.IOException;
@@ -29,11 +32,11 @@ import static org.dpr.mykeys.app.utils.CertificateUtils.randomBigInteger;
 
 public class CertificateBuilder implements CertificateGeneratorExtensions {
 
-    private final String DEFAULT_SIGNATURE_ALGORITHM="SHA256WithRSAEncryption";
-    private final String DEFAULT_KEY_ALGORITHM="RSA";
-    private final int DEFAULT_KEY_SIZE=2048;
+    private static final String DEFAULT_SIGNATURE_ALGORITHM="SHA256WithRSAEncryption";
+    private static final String DEFAULT_KEY_ALGORITHM="RSA";
+    private static final int DEFAULT_KEY_SIZE=2048;
 
-    private final Log log = LogFactory.getLog(CertificateBuilder.class);
+    private final Logger log = LogManager.getLogger(CertificateBuilder.class);
     private static final int AUTH_VALIDITY = 999;
     private static final int DEFAULT_VALIDITY = 365;
 
@@ -104,7 +107,7 @@ public class CertificateBuilder implements CertificateGeneratorExtensions {
         return this;
     }
     public CertificateBuilder withIssuerPrivateKey(PrivateKey pk){
-        this.issuerCertificate = issuerCertificate;
+        this.issuerPrivateKey = pk;
         return this;
     }
 
@@ -232,12 +235,12 @@ public class CertificateBuilder implements CertificateGeneratorExtensions {
 
         ASN1EncodableVector qualifiers = new ASN1EncodableVector();
 
-        if (!StringUtils.isEmpty(unotice)) {
+        if (!StringUtils.isBlank(unotice)) {
             UserNotice un = new UserNotice(null, new DisplayText(DisplayText.CONTENT_TYPE_UTF8STRING, unotice));
             PolicyQualifierInfo pqiUNOTICE = new PolicyQualifierInfo(PolicyQualifierId.id_qt_unotice, un);
             qualifiers.add(pqiUNOTICE);
         }
-        if (!StringUtils.isEmpty(cps)) {
+        if (!StringUtils.isBlank(cps)) {
 
             PolicyQualifierInfo pqiCPS = new PolicyQualifierInfo(cps);
             PolicyInformation pi = new PolicyInformation(PolicyQualifierId.id_qt_cps,
@@ -264,7 +267,7 @@ public class CertificateBuilder implements CertificateGeneratorExtensions {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(subject, serial, from, to, subject,
                 keypair.getPublic());
 
-        Certificate value = null;
+        Certificate value;
         try {
             ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keypair.getPrivate());
             X509CertificateHolder certHolder = builder.build(signer);

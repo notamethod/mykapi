@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.utils;
 
 /*
  * Copyright 2002-2017 the original author or authors.
@@ -23,14 +23,8 @@ import org.jetbrains.annotations.Nullable;
  * holding nested exceptions. Necessary because we can't share a base
  * class among different exception types.
  *
- * <p>Mainly for use within the framework.
  *
  * @author Juergen Hoeller
- * @since 2.0
- * @see NestedRuntimeException
- * @see NestedCheckedException
- * @see NestedIOException
- * @see org.springframework.web.util.NestedServletException
  */
 public abstract class NestedExceptionUtils {
 

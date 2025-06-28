@@ -1,10 +1,12 @@
 package org.dpr.mykeys.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.dpr.mykeys.app.CertificateType;
-import org.dpr.mykeys.app.KeyToolsException;
+import org.dpr.mykeys.app.certificate.CertificateType;
+import org.dpr.mykeys.app.keystore.KeyToolsException;
 import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreHelper;
@@ -31,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestExportsKeystore {
 
-    private final static Log log = LogFactory.getLog(TestExportsKeystore.class);
+    private final static Logger log = LogManager.getLogger(TestExportsKeystore.class);
 
     private static final String AC_NAME = "mykeys root ca 2";
 
@@ -76,7 +78,6 @@ public class TestExportsKeystore {
         try {
             retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e);
             fail(e.getMessage());
         }

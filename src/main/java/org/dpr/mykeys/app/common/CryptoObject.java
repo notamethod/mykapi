@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.common;
 
 /**
  * to delete if not used
@@ -6,8 +6,8 @@ package org.dpr.mykeys.app;
 public interface CryptoObject {
     byte[] getEncoded();
 
-    public enum Type{
-        CERTIFICATE, PRIVATE_KEY;
+    enum Type{
+        CERTIFICATE, PRIVATE_KEY
     }
     Type getType();
 

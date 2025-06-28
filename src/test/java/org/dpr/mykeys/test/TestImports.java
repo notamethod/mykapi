@@ -1,7 +1,7 @@
 package org.dpr.mykeys.test;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
@@ -68,9 +68,7 @@ public class TestImports {
             assertEquals(1, lst.size());
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
+            fail(e);
 
 
         }
@@ -96,9 +94,7 @@ public class TestImports {
             assertEquals(3, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
+            fail(e);
 
 
         }
@@ -124,9 +120,7 @@ public class TestImports {
             assertEquals(3, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
+            fail(e);
 
 
         }
@@ -150,9 +144,7 @@ public class TestImports {
             assertEquals(3, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
+            fail(e);
 
 
         }
@@ -176,8 +168,7 @@ public class TestImports {
             assertEquals(4, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
     @Test
@@ -197,8 +188,7 @@ public class TestImports {
             assertEquals(4, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -219,8 +209,7 @@ public class TestImports {
             assertEquals(3, ksTarget.getCertificates().size());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -283,8 +272,7 @@ public class TestImports {
         try {
             kserv.importElements(ksSource, ksTarget);
         } catch (ServiceException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
         ksTarget = repositoryTarget.load(target.toAbsolutePath().toString(), pwdTarget);
         return ksTarget.getCertificates().size();

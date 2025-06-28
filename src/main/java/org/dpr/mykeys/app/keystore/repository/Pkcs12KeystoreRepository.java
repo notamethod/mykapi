@@ -1,7 +1,9 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
@@ -11,7 +13,7 @@ import java.util.List;
 
 class Pkcs12KeystoreRepository extends AbstractJavaKeystoreRepository {
 
-    private static final Log log = LogFactory.getLog(JksKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(JksKeystoreRepository.class);
 
     public Pkcs12KeystoreRepository() {
         this.format = StoreFormat.PKCS12;

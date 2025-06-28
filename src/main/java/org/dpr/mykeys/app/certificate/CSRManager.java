@@ -1,7 +1,9 @@
 package org.dpr.mykeys.app.certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -19,7 +21,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 
@@ -37,7 +39,7 @@ public class CSRManager {
 
     private static final int CSR_VALIDITY = 365;
     private static final String CSR_SIGN_ALGORITHM = "SHA256withRSA";
-    private static final Log log = LogFactory.getLog(CSRManager.class);
+    private static final Logger log = LogManager.getLogger(CSRManager.class);
 
 
 
@@ -52,7 +54,7 @@ public class CSRManager {
      */
     public Certificate generateCertificate(InputStream is, Certificate issuer) throws ServiceException, IOException {
 
-        X509Certificate[] certificates = null;
+        X509Certificate[] certificates;
         Certificate cert = null;
         try {
 
@@ -69,7 +71,7 @@ public class CSRManager {
             log.info("x500Name is: " + x500Name + "\n");
             log.info("Signature algorithm is: " + csr.getSignatureAlgorithm() + "\n");
 
-            byte[] certencoded = sign(csr, issuer.getPrivateKey(), issuer.getCertificate());
+            byte[] certencoded = sign(csr, issuer.getPrivateKey(), issuer.getX509Certificate());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 
             InputStream in = new ByteArrayInputStream(certencoded);
@@ -128,7 +130,7 @@ public class CSRManager {
                 extUtils.createSubjectKeyIdentifier(inputCSR.getSubjectPublicKeyInfo()));
         certgen.addExtension(Extension.authorityKeyIdentifier, false,
                 new AuthorityKeyIdentifier(
-                        new GeneralNames(new GeneralName(new X509Name(caCert.getSubjectX500Principal().getName()))),
+                        new GeneralNames(new GeneralName(new X500Name(caCert.getSubjectX500Principal().getName()))),
                         caCert.getSerialNumber()));
 
         ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)

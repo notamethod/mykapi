@@ -1,15 +1,13 @@
 package org.dpr.mykeys.app.utils;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -21,7 +19,7 @@ import java.util.*;
 
 public class X509Util {
 
-    private final static Log log = LogFactory.getLog(X509Util.class);
+    private final static Logger log = LogManager.getLogger(X509Util.class);
     private static Map<String, String> mapNames = null;
 
     private X509Util() {
@@ -47,7 +45,7 @@ public class X509Util {
 
     public static String toHexString(byte[] b, String separator, boolean upperCase) {
         StringBuilder retour = new StringBuilder();
-        char[] car = Hex.encodeHex(b);
+        char[] car = encodeHex(b);
         for (int i = 0; i < car.length; i = i + 2) {
             retour.append(car[i]);
             retour.append(car[i + 1]);
@@ -83,9 +81,8 @@ public class X509Util {
         byte[] policyBytes = cert.getExtensionValue(Extension.certificatePolicies.toString());
         try {
             if (policyBytes != null) {
-                CertificatePolicies policies = CertificatePolicies.getInstance(X509ExtensionUtil.fromExtensionValue(policyBytes));
-                PolicyInformation[] policyInformation = policies.getPolicyInformation();
-                return policyInformation;
+                CertificatePolicies policies = CertificatePolicies.getInstance(JcaX509ExtensionUtils.parseExtensionValue(policyBytes));
+                return policies.getPolicyInformation();
             }
         } catch (IOException e) {
             log.error("get policies error", e);
@@ -115,7 +112,7 @@ public class X509Util {
             return subjectMap;
         }
         String principalName = x500Principal.getName();
-        if (StringUtils.isBlank(principalName)) {
+        if (null == principalName || principalName.isBlank()) {
             return subjectMap;
         }
         X500Name x509Name = new X500Name(principalName);
@@ -161,8 +158,8 @@ public class X509Util {
 
         CRLDistPoint distPoints;
         try {
-            distPoints = CRLDistPoint.getInstance(X509ExtensionUtil
-                    .fromExtensionValue(extension));
+            distPoints = CRLDistPoint.getInstance(JcaX509ExtensionUtils
+                    .parseExtensionValue(extension));
         } catch (Exception e) {
             log.info("CRLDistributionPoint Extension unknown for: "
                     + certX509.getSubjectDN());//
@@ -217,9 +214,9 @@ public class X509Util {
         List<String> keys = new ArrayList<>();
         byte[] kuBytes = certificate.getExtensionValue(Extension.extendedKeyUsage.toString());
         if (kuBytes != null) {
-            ExtendedKeyUsage eku = null;
+            ExtendedKeyUsage eku;
             try {
-                eku = ExtendedKeyUsage.getInstance(X509ExtensionUtil.fromExtensionValue(kuBytes));
+                eku = ExtendedKeyUsage.getInstance(JcaX509ExtensionUtils.parseExtensionValue(kuBytes));
             } catch (IOException e) {
                 throw new Exception("invalid key usages informations", e);
             }
@@ -234,5 +231,17 @@ public class X509Util {
         return keys;
     }
 
+    public static char[] encodeHex(byte[] data) {
+        final char[] digits = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+        int l = data.length;
+        char[] out = new char[l << 1];
+        int i = 0;
+
+        for(int var4 = 0; i < l; ++i) {
+            out[var4++] = digits[(240 & data[i]) >>> 4];
+            out[var4++] = digits[15 & data[i]];
+        }
+        return out;
+    }
 }

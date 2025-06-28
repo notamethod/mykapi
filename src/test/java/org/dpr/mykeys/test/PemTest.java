@@ -1,7 +1,9 @@
 package org.dpr.mykeys.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.keystore.*;
@@ -21,7 +23,7 @@ import java.security.Security;
 
 public class PemTest {
 
-    private final static Log log = LogFactory.getLog(PemTest.class);
+    private final static Logger log = LogManager.getLogger(PemTest.class);
 
     private static final String AC_NAME = "mykeys root ca 2";
 

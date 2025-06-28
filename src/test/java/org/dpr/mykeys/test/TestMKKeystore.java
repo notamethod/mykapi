@@ -1,7 +1,9 @@
 package org.dpr.mykeys.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpr.mykeys.app.keystore.*;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestMKKeystore {
 
-    private final static Log log = LogFactory.getLog(TestMKKeystore.class);
+    private final static Logger log = LogManager.getLogger(TestMKKeystore.class);
 
     private static final String AC_NAME = "mykeys root ca 2";
 

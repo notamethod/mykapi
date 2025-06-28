@@ -1,9 +1,11 @@
 package org.dpr.mykeys.app.keystore;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.CryptoObject;
-import org.dpr.mykeys.app.NestedExceptionUtils;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dpr.mykeys.app.common.CryptoObject;
+import org.dpr.mykeys.app.utils.NestedExceptionUtils;
 import org.dpr.mykeys.app.keystore.repository.MkKeystore;
 import org.dpr.mykeys.app.keystore.repository.PemKeystoreRepository;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
@@ -21,7 +23,7 @@ public class KeystoreUtils {
     private static final String[] KSTYPE_EXTS_DER = {"der", "cer"};
     private static final String[] KSTYPE_EXT_PEM = {"pem", "crt"};
 
-    private static final Log log = LogFactory.getLog(KeystoreUtils.class);
+    private static final Logger log = LogManager.getLogger(KeystoreUtils.class);
 
     public static StoreFormat findKeystoreType(String filename) throws UnknownKeystoreTypeException {
         StoreFormat format = KeystoreUtils.findKeystoreTypeByExtension(filename);
@@ -77,8 +79,6 @@ public class KeystoreUtils {
                 System.out.println("key");
                 return StoreFormat.JKS;
             }
-        } catch (IOException e) {
-
         }
         mkKeystore = MkKeystore.getInstance(StoreFormat.PKCS12);
         try {
@@ -89,8 +89,6 @@ public class KeystoreUtils {
                     && rootException.getMessage().contains("wrong password") && rootException.getMessage().contains("PKCS12")) {
                 return StoreFormat.PKCS12;
             }
-        } catch (IOException e) {
-
         }
         mkKeystore = MkKeystore.getInstance(StoreFormat.PEM);
         try {
@@ -100,8 +98,6 @@ public class KeystoreUtils {
                 return StoreFormat.PEM;
         } catch (RepositoryException e) {
             e.printStackTrace();
-
-        } catch (IOException e) {
 
         }
         return StoreFormat.UNKNOWN;

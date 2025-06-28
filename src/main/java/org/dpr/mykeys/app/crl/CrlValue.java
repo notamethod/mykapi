@@ -4,7 +4,7 @@
 package org.dpr.mykeys.app.crl;
 
 import org.dpr.mykeys.app.certificate.MkCertificate;
-import org.dpr.mykeys.app.NodeInfo;
+import org.dpr.mykeys.app.common.NodeInfo;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -82,7 +82,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @return
-     * @see org.dpr.mykeys.app.NodeInfo#getName()
+     * @see NodeInfo#getName()
      */
     @Override
     public String getName() {
@@ -96,7 +96,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @return
-     * @see org.dpr.mykeys.app.NodeInfo#getPath()
+     * @see NodeInfo#getPath()
      */
     @Override
     public String getPath() {
@@ -110,7 +110,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @param name
-     * @see org.dpr.mykeys.app.NodeInfo#setName(java.lang.String)
+     * @see NodeInfo#setName(java.lang.String)
      */
     @Override
     public void setName(String name) {
@@ -124,7 +124,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @param path
-     * @see org.dpr.mykeys.app.NodeInfo#setPath(java.lang.String)
+     * @see NodeInfo#setPath(java.lang.String)
      */
     @Override
     public void setPath(String path) {
@@ -138,7 +138,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @return
-     * @see org.dpr.mykeys.app.NodeInfo#isOpen()
+     * @see NodeInfo#isOpen()
      */
     @Override
     public boolean isOpen() {
@@ -152,7 +152,7 @@ public class CrlValue implements NodeInfo {
      * <BR>
      *
      * @param isOpen
-     * @see org.dpr.mykeys.app.NodeInfo#setOpen(boolean)
+     * @see NodeInfo#setOpen(boolean)
      */
     @Override
     public void setOpen(boolean isOpen) {

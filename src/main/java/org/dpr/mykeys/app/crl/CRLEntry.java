@@ -15,7 +15,7 @@ public class CRLEntry {
     private CRLReason reason;
 
     public CRLEntry(Certificate value, int revocationReason) {
-        serialNumber = value.getCertificate().getSerialNumber();
+        serialNumber = value.getX509Certificate().getSerialNumber();
         subject = value.getSubjectString();
         revocationDate = new Date();
         this.revocationReason = revocationReason;

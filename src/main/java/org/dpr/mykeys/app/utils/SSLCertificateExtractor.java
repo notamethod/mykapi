@@ -1,7 +1,10 @@
 package org.dpr.mykeys.app.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -38,7 +41,7 @@ public class SSLCertificateExtractor {
     public static final String END_CERT = "-----END CERTIFICATE-----";
 
 
-    private static final Log log = LogFactory.getLog(SSLCertificateExtractor.class);
+    private static final Logger log = LogManager.getLogger(SSLCertificateExtractor.class);
     private final String url;
     private String connectx;
     private String verifyCert;
@@ -57,7 +60,7 @@ public class SSLCertificateExtractor {
     public String run(String defaultCertificatePath, boolean getFullChaine, boolean checkValidity) throws Exception {
 
         URI uri = new URI(url);
-        File outputFile = null;
+        File outputFile;
 
         String host = uri.getHost();
         int port = uri.getPort();
@@ -65,7 +68,7 @@ public class SSLCertificateExtractor {
             port = 443;
         Set<TrustAnchor> anchors = getTrustAnchors();
         try {
-            SSLContext ctx = null;
+            SSLContext ctx;
             ctx = SSLContext.getInstance("TLS");
             ctx.init(null, new TrustManager[]{new CustomTrustManager()}, null);
 
@@ -81,7 +84,6 @@ public class SSLCertificateExtractor {
                 try (InputStream in = new FileInputStream(f)) {
                     CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
                     certToVerify = (X509Certificate) certificateFactory.generateCertificate(in);
-                    in.close();
                 } catch (Exception e) {
                     printMessage("ERROR: could not load certificate: " + e);
                     throw new Exception("Extraction error: " + EXIT_VERIFY_CERT_LOAD_ERROR);
@@ -89,12 +91,12 @@ public class SSLCertificateExtractor {
             }
 
             printMessage("Connecting to " + url);
-            Socket s = ctx.getSocketFactory().createSocket(host, port);
-            printMessage("Connected? " + s.isConnected());
-            OutputStream os = s.getOutputStream();
-            os.write("GET / HTTP/1.1\n\n".getBytes());
-            os.close();
-            s.close();
+            try (Socket s = ctx.getSocketFactory().createSocket(host, port)) {
+                printMessage("Connected? " + s.isConnected());
+                OutputStream os = s.getOutputStream();
+                os.write("GET / HTTP/1.1\n\n".getBytes());
+                os.close();
+            }
 
             printMessage(String.format("The server sent %d certificates", certsSent));
 
@@ -175,7 +177,7 @@ public class SSLCertificateExtractor {
                 printMessage("ERROR: could not write root.pem: " + e);
                 throw new Exception("Extraction error: " + EXIT_WRITE_ROOT_CERT_ERROR);
             }
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | KeyStoreException | CertificateException | KeyManagementException e) {
             printMessage("ERROR: SSL Error: " + e);
             throw new Exception("Extraction error: " + EXIT_SSL_ERROR);
         } catch (UnknownHostException e) {
@@ -184,18 +186,6 @@ public class SSLCertificateExtractor {
         } catch (IOException e) {
             printMessage("ERROR: IO Failure: " + e);
             throw new Exception("Extraction error: " + EXIT_CONNECT_FAILURE);
-        } catch (KeyManagementException e) {
-            printMessage("ERROR: SSL Error: " + e);
-            throw new Exception("Extraction error: " + EXIT_SSL_ERROR);
-        } catch (CertificateException e) {
-            printMessage("ERROR: SSL Error: " + e);
-            throw new Exception("Extraction error: " + EXIT_SSL_ERROR);
-        } catch (KeyStoreException e) {
-            printMessage("ERROR: SSL Error: " + e);
-            throw new Exception("Extraction error: " + EXIT_SSL_ERROR);
-        } catch (InvalidAlgorithmParameterException e) {
-            printMessage("ERROR: SSL Error: " + e);
-            throw new Exception("Extraction error: " + EXIT_SSL_ERROR);
         }
         return outputFile.getAbsolutePath();
     }
@@ -227,10 +217,11 @@ public class SSLCertificateExtractor {
             NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         // Load the JDK's cacerts keystore file
         String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
-        FileInputStream is = new FileInputStream(filename);
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        String password = "changeit";
-        keystore.load(is, password.toCharArray());
+        KeyStore keystore;
+        try (FileInputStream is = new FileInputStream(filename)) {
+            keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(is, "changeit".toCharArray());
+        }
 
         // This class retrieves the trust anchor (root) CAs from the keystore
         PKIXParameters params = new PKIXParameters(keystore);
@@ -263,45 +254,6 @@ public class SSLCertificateExtractor {
                 lastIssuer = cert.getIssuerDN();
                 lastSubject = cert.getSubjectDN();
                 certificateChain.add(cert);
-            }
-
-            if (badChain) {
-                printMessage("Please fix the server's certificate chain and try again.");
-                throw new CertificateException("Extraction error: " + EXIT_SERVER_CHAIN_ERROR);
-            }
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-    }
-
-    class OldCustomTrustManager implements X509TrustManager {
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-            certsSent = x509Certificates.length;
-            boolean badChain = false;
-            for (X509Certificate cert : x509Certificates) {
-                printMessage("Certificate: ");
-                printMessage("  Subject: " + cert.getSubjectDN());
-                printMessage("  Issuer : " + cert.getIssuerDN());
-
-                // Check to make sure chain is okay
-                if (lastIssuer != null && !cert.getSubjectDN().equals(lastIssuer)) {
-                    printMessage("ERROR: the certificate chain returned from the server looks incorrect.  The previous certificate's issuer does not match this certificate's subject!");
-                    printMessage(String.format("  expected: %s\n  but found: %s", lastIssuer, cert.getSubjectDN()));
-                    badChain = true;
-                }
-
-                lastCert = cert;
-                lastIssuer = cert.getIssuerDN();
-                lastSubject = cert.getSubjectDN();
             }
 
             if (badChain) {

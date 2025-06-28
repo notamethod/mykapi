@@ -1,8 +1,10 @@
 package org.dpr.mykeys.app.crl;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -32,22 +34,12 @@ import java.util.Map;
  */
 public class CRLManager {
 
-	private static final Log log = LogFactory.getLog(CRLManager.class);
+	private static final Logger log = LogManager.getLogger(CRLManager.class);
 
     public static final String CRL_EXTENSION = ".crl";
 
 	public static final String[] REASONSTRING = new String[]{"unspecified", "keyCompromise", "cACompromise", "affiliationChanged", "superseded", "cessationOfOperation", "certificateHold", "unknown", "removeFromCRL", "privilegeWithdrawn", "aACompromise"};
     private final String provider;
-
-	/**
-	 * . <BR>
-	 * 
-	 * 
-	 * @param securityProvider
-	 */
-    private CRLManager(String securityProvider) {
-		provider = securityProvider;
-	}
 
     public CRLManager() {
         provider = "BC";
@@ -100,11 +92,9 @@ public class CRLManager {
 			throws GeneralSecurityException, IOException {
 		// EtatCrl etatCrl = EtatCrl.UNKNOWN;
 
-		InputStream inStream;
-		inStream = new FileInputStream(crlFile);
-		IOUtils.closeQuietly(inStream);
-
-		return validateCRL(date, inStream);
+		try (InputStream inStream = new FileInputStream(crlFile)) {
+			return validateCRL(date, inStream);
+		}
 	}
 
 	/**
@@ -161,21 +151,19 @@ public class CRLManager {
 		return crl;
 	}
 
-	public X509CRL generateCrl(Certificate certSign, Date thisDate, Date nextDate, Collection filter) throws CRLException, OperatorCreationException {
-		X509Certificate certificate = certSign.getCertificate();
+	public X509CRL generateCrl(Certificate certSign, Date thisDate, Date nextDate, Collection<CRLEntry> filter) throws CRLException, OperatorCreationException {
+		X509Certificate certificate = certSign.getX509Certificate();
 		PrivateKey privateKey = (certSign.getPrivateKey());
 
 		X500Name crlIssuer = X500Name.getInstance(certificate.getSubjectX500Principal().getEncoded());
-		X500Name caName = X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
+		//X500Name caName = X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
 		X509v2CRLBuilder builder = new X509v2CRLBuilder(crlIssuer,
 				thisDate
 		);
 
 		builder.setNextUpdate(nextDate);
 
-		for (Object value : filter) {
-			CRLEntry entry = (CRLEntry) value;
-
+		for (CRLEntry entry : filter) {
 			builder.addCRLEntry(entry.getSerialNumber(), new Date(), entry.getReason());
 		}
 
@@ -332,11 +320,11 @@ public class CRLManager {
             OperatorCreationException {
 
 
-        X509Certificate certificate = certSign.getCertificate();
+        X509Certificate certificate = certSign.getX509Certificate();
         PrivateKey privateKey = (certSign.getPrivateKey());
 
         X500Name crlIssuer = X500Name.getInstance(certificate.getSubjectX500Principal().getEncoded());
-        X500Name caName = X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
+        //X500Name caName = X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
         X509v2CRLBuilder builder = new X509v2CRLBuilder(crlIssuer,
                 crlValue.getThisUpdate()
         );

@@ -2,7 +2,7 @@ package org.dpr.mykeys.test.newimpl;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
 import org.dpr.mykeys.app.keystore.repository2.PemRepository;
 import org.dpr.mykeys.app.utils.ProviderUtil;

@@ -1,10 +1,12 @@
 package org.dpr.mykeys.app.keystore.repository;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
@@ -17,7 +19,7 @@ import java.util.*;
 
 class DerKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository implements MkKeystore {
 
-    private static final Log log = LogFactory.getLog(DerKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(DerKeystoreRepository.class);
 
 
     public DerKeystoreRepository() {
@@ -32,7 +34,7 @@ class DerKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository imp
             byte[] privKey = privateKey.getEncoded();
 
 // binary ?
-            try (FileOutputStream keyfos = new FileOutputStream(new File(fName + ".key"))) {
+            try (FileOutputStream keyfos = new FileOutputStream(fName + ".key")) {
                 keyfos.write(privKey);
             }
 
@@ -57,7 +59,7 @@ class DerKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository imp
         try {
             try (FileOutputStream keyfos = new FileOutputStream(file)) {
                 for (Certificate certInfo : ksValue.getCertificates()) {
-                    keyfos.write(certInfo.getCertificate().getEncoded());
+                    keyfos.write(certInfo.getX509Certificate().getEncoded());
                 }
             }
         } catch (Exception e) {
@@ -74,14 +76,13 @@ class DerKeystoreRepository extends AbstractSimpleAbstractKeystoreRepository imp
 
         List<Certificate> certsRetour = new ArrayList<>();
         //  InputStream is = null;
-        try (InputStream is = new FileInputStream(new File(ksValue.getPath()))) {
+        try (InputStream is = new FileInputStream(ksValue.getPath())) {
             //  is = new FileInputStream(new File(ksValue.getPath()));
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
 
             // chargement du certificat
             Collection<X509Certificate> certs = (Collection<X509Certificate>) cf.generateCertificates(is);
-            Set<X509Certificate> certificates = new HashSet<>(certs);
             for (X509Certificate cert : certs) {
                 Certificate certInfo = new Certificate(null, cert);
 

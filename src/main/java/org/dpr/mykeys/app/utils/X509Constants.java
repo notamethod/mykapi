@@ -1,4 +1,4 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.utils;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 

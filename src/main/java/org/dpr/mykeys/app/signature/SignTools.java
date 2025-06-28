@@ -22,7 +22,7 @@ public class SignTools {
 		
 	}
 
-//	public static final Log log = LogFactory.getLog(SignTools.class);
+//	public static final Logger log = LogManager.getLogger(SignTools.class);
 //	public static void main(String[] args) {
 //		Security.addProvider(new BouncyCastleProvider());
 //		X509Certificate certs[] = null;

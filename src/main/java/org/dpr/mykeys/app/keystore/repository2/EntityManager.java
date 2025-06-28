@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.keystore.repository2;
 
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.KeystoreUtils;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.UnknownKeystoreTypeException;
@@ -12,46 +12,39 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class EntityManager
-{
-    private boolean autoCommit=true;
+public class EntityManager {
+    final CryptoRepository repository;
     File file;
-    CryptoRepository repository;
+    private boolean autoCommit = true;
 
-    public EntityManager(@NotNull  String fileName) throws RepositoryException {
+    public EntityManager(@NotNull String fileName) throws RepositoryException {
         this(fileName, null, null);
     }
+
     public EntityManager(@NotNull String fileName, char[] pass) throws RepositoryException {
         this(fileName, pass, null);
     }
+
     public EntityManager(@NotNull String fileName, char[] pass, StoreFormat givenFormat) throws RepositoryException {
-        Path file= Paths.get(fileName);
-        StoreFormat format = null;
+        Path file = Paths.get(fileName);
+        StoreFormat format;
         if (givenFormat == null) {
             try {
                 format = KeystoreUtils.findKeystoreType(fileName);
             } catch (UnknownKeystoreTypeException e) {
                 throw new RepositoryException("Error getting child list", e);
             }
-        }else{
+        } else {
             format = givenFormat;
         }
-        switch (format) {
-            case PEM:
-                repository= new PemRepository(file);
-                break;
-            case DER:
-                repository= new DerRepository(file);
-                break;
-            case PKCS12:
-                repository= new JavaRepository(file, StoreFormat.PKCS12, pass, false);
-                break;
-            case JKS:
-                repository= new JavaRepository(file,StoreFormat.JKS, pass, true);
-                break;
-            default:
-                repository= new VanillaRepository(file);
-        }
+        repository =
+                switch (format) {
+                    case JKS -> new JavaRepository(file, StoreFormat.JKS, pass, true);
+                    case PKCS12 -> new JavaRepository(file, StoreFormat.PKCS12, pass, false);
+                    case PEM -> new PemRepository(file);
+                    case DER -> new DerRepository(file);
+                    default -> new VanillaRepository(file);
+                };
     }
 
     public long count() {
@@ -65,7 +58,7 @@ public class EntityManager
     }
 
     private void commit() throws RepositoryException {
-        if (autoCommit){
+        if (autoCommit) {
             repository.persist();
         }
     }

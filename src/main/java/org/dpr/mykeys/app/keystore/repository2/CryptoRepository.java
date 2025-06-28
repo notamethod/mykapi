@@ -1,6 +1,6 @@
 package org.dpr.mykeys.app.keystore.repository2;
 
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public interface CryptoRepository<T extends CryptoObject, ID> {
      *
      * @return
      */
-    List<T> findAll() throws RepositoryException;
+    List<T> findAll() ;
 
     /**
      * Returns all instances of the type T with the given IDs.

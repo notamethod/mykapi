@@ -1,7 +1,9 @@
 package org.dpr.mykeys.app.keystore.repository2;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
@@ -21,7 +23,7 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 public class JavaRepository extends AbstractCryptoRepository implements CryptoRepository {
-    private static final Log log = LogFactory.getLog(JavaRepository.class);
+    private static final Logger log = LogManager.getLogger(JavaRepository.class);
 
     private Path file;
     private String state = "";
@@ -54,7 +56,6 @@ public class JavaRepository extends AbstractCryptoRepository implements CryptoRe
         try {
             enumKs = ks.aliases();
             if (enumKs != null && enumKs.hasMoreElements()) {
-
                 while (enumKs.hasMoreElements()) {
                     String alias = enumKs.nextElement();
 
@@ -130,7 +131,7 @@ public class JavaRepository extends AbstractCryptoRepository implements CryptoRe
                 for (java.security.cert.Certificate chainCert : certs) {
                     bf.append(chainCert.toString());
                 }
-                certInfo.setChaineStringValue(bf.toString());
+                certInfo.setChainString(bf.toString());
                 certInfo.setCertificateChain(certs);
             }
 

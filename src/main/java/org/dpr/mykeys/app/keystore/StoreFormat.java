@@ -1,7 +1,5 @@
 package org.dpr.mykeys.app.keystore;
 
-import org.dpr.mykeys.app.PkiTools.TypeObject;
-
 public enum StoreFormat {
     JKS(".jks"), PKCS12(".p12"), PEM(".crt"), DER(".cer"), UNKNOWN(""), PROPERTIES("");
 
@@ -19,7 +17,7 @@ public enum StoreFormat {
 
 
 	public static StoreFormat fromValue(String v) {
-		StoreFormat fmt = null;
+		StoreFormat fmt;
 		try {
 			fmt = valueOf(v);
 		} catch (Exception e) {

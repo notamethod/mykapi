@@ -6,17 +6,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.dpr.mykeys.app.ServiceException;
-import org.dpr.mykeys.app.CertificateType;
+import org.dpr.mykeys.app.utils.ServiceException;
 
 public class CertificateManager {
 
-    private final Log log = LogFactory.getLog(CertificateManager.class);
+    private final Logger log = LogManager.getLogger(CertificateManager.class);
     private static final int AUTH_VALIDITY = 999;
 
     public CertificateManager() {
@@ -101,7 +101,7 @@ public class CertificateManager {
      */
     //FIXME: refactor
     public KeyPair generateKeyPair(String algorithm, int keyLength) throws ServiceException {
-        KeyPair keypair = null;
+        KeyPair keypair;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("generating keypair: " + algorithm + " keypair: " + keyLength);

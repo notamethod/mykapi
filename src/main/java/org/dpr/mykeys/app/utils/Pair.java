@@ -1,7 +1,5 @@
 package org.dpr.mykeys.app.utils;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.dpr.mykeys.app.CertificateType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

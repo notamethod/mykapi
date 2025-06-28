@@ -1,4 +1,6 @@
-package org.dpr.mykeys.app;
+package org.dpr.mykeys.app.keystore;
+
+import org.dpr.mykeys.app.utils.ServiceException;
 
 public class PasswordNotFoundException extends ServiceException {
 

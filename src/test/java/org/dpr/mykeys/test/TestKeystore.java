@@ -1,11 +1,13 @@
 package org.dpr.mykeys.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.dpr.mykeys.app.CertificateType;
-import org.dpr.mykeys.app.KeyToolsException;
-import org.dpr.mykeys.app.ServiceException;
+import org.dpr.mykeys.app.certificate.CertificateType;
+import org.dpr.mykeys.app.keystore.KeyToolsException;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.dpr.mykeys.app.keystore.TamperedWithException;
 import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.certificate.Certificate;
@@ -33,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestKeystore {
 
-    private final static Log log = LogFactory.getLog(TestKeystore.class);
+    private final static Logger log = LogManager.getLogger(TestKeystore.class);
 
     private static final String AC_NAME = "mykeys root ca 2";
 
@@ -83,8 +85,7 @@ public class TestKeystore {
         try {
             service.load(ksInfo);
         } catch (ServiceException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -104,8 +105,7 @@ public class TestKeystore {
             boolean changed = service.changePassword(ksInfo, null, "bbb".toCharArray());
             assertTrue(changed);
         } catch (TamperedWithException | KeyToolsException | ServiceException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
 
         MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
@@ -114,8 +114,7 @@ public class TestKeystore {
             boolean changed = service.changePassword(ksInfo, "bbb".toCharArray(), "ccc".toCharArray());
             assertTrue(changed);
         } catch (TamperedWithException | KeyToolsException | ServiceException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
         mkKeystore.load(fileName, "ccc".toCharArray() );
     }
@@ -130,12 +129,10 @@ public class TestKeystore {
             MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
             MKKeystoreValue ksInfo = mkKeystore.load(filename, "111".toCharArray() );
             mkKeystore.save(ksInfo, MkKeystore.SAVE_OPTION.REPLACE);
-        } catch (RepositoryException | IOException e) {
-            e.printStackTrace();
-            fail();
+        } catch (RepositoryException e) {
+            fail(e);
         }
     }
-
 
     @Test
     public void add_cert() throws ServiceException {
@@ -161,8 +158,7 @@ public class TestKeystore {
             service.addCertToKeyStore((KeyStoreValue) ki, val, "111".toCharArray(), null);
         } catch (Exception e) {
 
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
 
 
@@ -191,9 +187,7 @@ public class TestKeystore {
             MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.JKS);
             mkKeystore.create(filename, "111".toCharArray());
         } catch (Exception e) {
-
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -210,16 +204,14 @@ public class TestKeystore {
         try {
             ksBuilder = new KeystoreBuilder(StoreFormat.PKCS12);
         } catch (KeyStoreException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
 
         try {
             MkKeystore mkKeystore = MkKeystore.getInstance(StoreFormat.PKCS12);
             mkKeystore.create(filename, "111".toCharArray());
         } catch (Exception e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -247,10 +239,9 @@ public class TestKeystore {
             retValue = certServ.generate(certModel, certModel, CertificateType.STANDARD);
             System.out.println(retValue.getPolicyCPS());
 
-            Certificate cv = new Certificate("xx", retValue.getCertificate());
+            Certificate cv = new Certificate("xx", retValue.getX509Certificate());
             System.out.println(cv.getOtherParams());
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e);
             fail(e.getMessage());
         }
@@ -285,8 +276,7 @@ public class TestKeystore {
             }
             assertTrue(found);
         } catch (ServiceException | UnknownKeystoreTypeException e) {
-            e.printStackTrace();
-            fail();
+            fail(e);
         }
     }
 
@@ -399,7 +389,7 @@ public class TestKeystore {
             service.exportPrivateKey(pk, fos, StoreFormat.PEM, null);
             fos.close();
         } catch (KeyToolsException e) {
-            e.printStackTrace();
+            throw new RepositoryException(e);
         }
 
     }

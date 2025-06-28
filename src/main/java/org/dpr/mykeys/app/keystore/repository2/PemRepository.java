@@ -1,17 +1,19 @@
 package org.dpr.mykeys.app.keystore.repository2;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.dpr.mykeys.app.PrivateKeyValue;
+import org.dpr.mykeys.app.common.PrivateKeyValue;
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.CryptoObject;
+import org.dpr.mykeys.app.common.CryptoObject;
 import org.dpr.mykeys.app.keystore.PEMType;
 import org.dpr.mykeys.app.keystore.repository.RepositoryException;
 import org.jetbrains.annotations.NotNull;
@@ -22,13 +24,11 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Base64;
 
 public class PemRepository extends AbstractCryptoRepository implements CryptoRepository  {
 
-    private static final Log log = LogFactory.getLog(PemRepository.class);
+    private static final Logger log = LogManager.getLogger(PemRepository.class);
 
     private Path file;
     private String state = "";
@@ -50,7 +50,7 @@ public class PemRepository extends AbstractCryptoRepository implements CryptoRep
 
             while ((object = reader.readObject()) != null) {
                 if (object instanceof PrivateKeyInfo) {
-                    PrivateKey privateKey = null;
+                    PrivateKey privateKey;
                     try {
                         PrivateKeyInfo pki = (PrivateKeyInfo) object;
                         privateKey = jcaPEMKeyConverter.getPrivateKey(pki);
@@ -61,7 +61,7 @@ public class PemRepository extends AbstractCryptoRepository implements CryptoRep
                     }
 
                 } else if (object instanceof X509CertificateHolder) {
-                    X509Certificate cert = null;
+                    X509Certificate cert;
                     try {
                         cert = new JcaX509CertificateConverter().setProvider("BC")
                                 .getCertificate((X509CertificateHolder) object);
@@ -94,8 +94,8 @@ public class PemRepository extends AbstractCryptoRepository implements CryptoRep
     private void saveBytes(OutputStream os) throws IOException, RepositoryException {
         PrintWriter osw = new PrintWriter(os);
         for (CryptoObject object : cryptoObjects) {
-            byte[] base64Encoded = Base64.encodeBase64(object.getEncoded());
-            PEMType pemType = null;
+            byte[] base64Encoded = Base64.getEncoder().encode(object.getEncoded());
+            PEMType pemType;
             try {
                 pemType = PEMType.valueOf(object.getType().toString());
             } catch (IllegalArgumentException e) {

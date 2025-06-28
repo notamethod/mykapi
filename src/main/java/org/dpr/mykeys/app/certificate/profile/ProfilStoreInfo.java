@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.dpr.mykeys.app.certificate.MkCertificate;
-import org.dpr.mykeys.app.NodeInfo;
+import org.dpr.mykeys.app.common.NodeInfo;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 import org.dpr.mykeys.app.keystore.StoreModel;
 import org.dpr.mykeys.app.keystore.StoreLocationType;

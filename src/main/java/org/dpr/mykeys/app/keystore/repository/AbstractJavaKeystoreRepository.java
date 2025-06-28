@@ -1,13 +1,14 @@
 package org.dpr.mykeys.app.keystore.repository;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.KeyToolsException;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dpr.mykeys.app.keystore.KeyToolsException;
 import org.dpr.mykeys.app.certificate.Certificate;
 import org.dpr.mykeys.app.keystore.KeyStoreValue;
 import org.dpr.mykeys.app.keystore.KeystoreBuilder;
-import org.dpr.mykeys.app.ServiceException;
 import org.dpr.mykeys.app.keystore.MKKeystoreValue;
 import org.dpr.mykeys.app.keystore.StoreFormat;
 
@@ -23,8 +24,9 @@ import java.util.List;
 
 public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRepository {
 
-    private static final Log log = LogFactory.getLog(AbstractJavaKeystoreRepository.class);
+    private static final Logger log = LogManager.getLogger(AbstractJavaKeystoreRepository.class);
     private boolean storePassword = true;
+    static final String ADDCERT_ERROR="Adding certificate(s) fails";
 
     public MKKeystoreValue create(String name, char[] password) throws RepositoryException, IOException {
 
@@ -35,7 +37,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
         try {
             KeyStore keystore = KeyStore.getInstance(format.toString());
             keystore.load(null, password);
-            OutputStream fos = new FileOutputStream(new File(name));
+            OutputStream fos = new FileOutputStream(name);
             keystore.store(fos, password);
             fos.close();
         } catch (Exception e) {
@@ -63,7 +65,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
             //FIXME: add or not ?
             ksValue.getCertificates().addAll(certificates);
         } catch (KeyToolsException e) {
-            throw new RepositoryException("addCerts fail", e);
+            throw new RepositoryException(ADDCERT_ERROR, e);
         }
     }
 
@@ -78,7 +80,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
      * @throws IOException
      */
     @Override
-    public MKKeystoreValue load(String name, char[] password) throws RepositoryException, IOException {
+    public MKKeystoreValue load(String name, char[] password) throws RepositoryException {
         KeyStoreValue keystoreValue = new KeyStoreValue(new File(name), this.format, password);
         keystoreValue.setOpen(true);
         keystoreValue.setLoaded(true);
@@ -137,7 +139,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
                         throw new EntityAlreadyExistsException("File already exists " + file.getAbsolutePath());
                     case REPLACE:
                         FileUtils.deleteQuietly(file);
-                        create(ksValue.getPath(), ((KeyStoreValue) ksValue).getPassword());
+                        create(ksValue.getPath(), ksValue.getPassword());
 
                         break;
                     case ADD:
@@ -160,7 +162,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
             KeystoreBuilder ksb = new KeystoreBuilder(ks);
             ksb.addCerts(ksValue, ksValue.getCertificates());
         } catch (KeyToolsException e) {
-            throw new RepositoryException("addCerts fail", e);
+            throw new RepositoryException(ADDCERT_ERROR, e);
         }
 
 
@@ -209,7 +211,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
             ksValue.setKeystore(loadJavaKeyStore(ksValue.getPath(), ksValue.getStoreFormat(), ksValue.getPassword()));
         }
 
-        PrivateKey privateKey = null;
+        PrivateKey privateKey;
         try {
             privateKey = (PrivateKey) ksValue.getKeystore().getKey(alias, password);
         } catch (Exception e) {
@@ -229,7 +231,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
      * @param ks
      * @param alias
      * @return
-     * @throws ServiceException
+     * @throws RepositoryException
      */
     private Certificate fillCertInfo(KeyStore ks, String alias) throws RepositoryException {
         Certificate certInfo;
@@ -253,7 +255,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
                 for (java.security.cert.Certificate chainCert : certs) {
                     bf.append(chainCert.toString());
                 }
-                certInfo.setChaineStringValue(bf.toString());
+                certInfo.setChainString(bf.toString());
                 certInfo.setCertificateChain(certs);
             }
 
@@ -270,7 +272,7 @@ public abstract class AbstractJavaKeystoreRepository extends AbstractKeystoreRep
             ksb.addCert(ksValue, certificate);
             ksValue.getCertificates().add(certificate);
         } catch (KeyToolsException e) {
-            throw new RepositoryException("addCerts fail", e);
+            throw new RepositoryException(ADDCERT_ERROR, e);
         }
 
     }

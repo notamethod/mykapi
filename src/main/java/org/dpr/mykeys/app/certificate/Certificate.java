@@ -1,7 +1,6 @@
 package org.dpr.mykeys.app.certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -10,15 +9,10 @@ import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.GeneralName;
 
-import org.dpr.mykeys.app.*;
-import org.bouncycastle.jce.X509Principal;
-import org.dpr.mykeys.app.utils.Pair;
-import org.dpr.mykeys.app.utils.PoliciesException;
-import org.dpr.mykeys.app.utils.PoliciesUtil;
-import org.dpr.mykeys.app.utils.X509Util;
+import org.dpr.mykeys.app.common.CryptoObject;
+import org.dpr.mykeys.app.utils.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -32,8 +26,9 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Certificate   implements MkCertificate<Certificate>, Cloneable, CryptoObject   {
-    private static final Log log = LogFactory.getLog(Certificate.class);
+@Log4j2
+public class Certificate   implements MkCertificate<Certificate>, CryptoObject {
+
     private final List<GeneralName> subjectNames = new ArrayList<>();
     private java.security.cert.Certificate[] certificateChain;
     private PublicKey publicKey;
@@ -54,7 +49,6 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
     }
 
     private int keyUsageInt;
-    private final Hashtable x509PrincipalMap = new Hashtable();
     private final List<Pair> subjectList = new ArrayList<>();
     @Deprecated
     private final Map<String, String> subjectMap = new LinkedHashMap<>();
@@ -64,19 +58,14 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
      * @return the S/N of the certificate in hexa
      */
     public String getSerialNumber() {
-        return X509Util.toHexString(certificate.getSerialNumber(), "", false);
+        return X509Util.toHexString(x509Certificate.getSerialNumber(), "", false);
     }
 
-    @Deprecated
-    public void setSerialNumber(BigInteger serialNumber) {
-        this.serialNumber = serialNumber;
-    }
     /**
      *
      * @deprecated
      */
     @Deprecated
-    private BigInteger serialNumber;
 
     private String freeSubject;
     private String alias;
@@ -87,9 +76,9 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
     private byte[] digestSHA1;
     private byte[] digestSHA256;
     private boolean containsPrivateKey = false;
-    private String chaineStringValue;
+    private String chainString;
     private String crlDistributionURL;
-    private X509Certificate certificate;
+    private X509Certificate x509Certificate;
     private String policyNotice;
     private String policyCPS;
     private String policyID;
@@ -110,8 +99,8 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         init(cert);
     }
 
-    public Certificate(String alias2, X509Certificate cert) throws GeneralSecurityException {
-        this.alias = alias2;
+    public Certificate(String alias, X509Certificate cert) throws GeneralSecurityException {
+        this.alias = alias;
 
         init(cert);
     }
@@ -172,21 +161,15 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
     }
 
     /**
-     * Retourne le chaineStringValue.
      *
      * @return String - le chaineStringValue.
      */
-    public String getChaineStringValue() {
-        return chaineStringValue;
+    public String getChainString() {
+        return chainString;
     }
 
-    /**
-     * Affecte le chaineStringValue.
-     *
-     * @param chaineStringValue le chaineStringValue à affecter.
-     */
-    public void setChaineStringValue(String chaineStringValue) {
-        this.chaineStringValue = chaineStringValue;
+    public void setChainString(String chainString) {
+        this.chainString = chainString;
     }
 
     private void init(X509Certificate[] certs) throws GeneralSecurityException {
@@ -197,7 +180,7 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
             for (java.security.cert.Certificate chainCert : certs) {
                 bf.append(chainCert.toString());
             }
-            setChaineStringValue(bf.toString());
+            setChainString(bf.toString());
         }
     }
 
@@ -212,7 +195,7 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
             log.warn("X509 certificate is null");
             return;
         }
-        this.setCertificate(certX509);
+        this.setX509Certificate(certX509);
         Map<ASN1ObjectIdentifier, String> oidMap = new HashMap<>();
         this.setAlgoPubKey(certX509.getPublicKey().getAlgorithm());
         this.setAlgoSig(certX509.getSigAlgName());
@@ -342,8 +325,9 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
 
     @Override
     public String getHumanIdentifier() {
+        /*e.getKey()+": "+*/
         return getSubjectList().stream()
-                .map(e->/*e.getKey()+": "+*/e.getValue())
+                .map(Pair::getValue)
                 .collect(Collectors.joining(", "));
     }
 
@@ -354,13 +338,6 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         this.password = password;
     }
 
-    /**
-     * @return the x509PrincipalMap
-     */
-    public Hashtable getX509PrincipalMap() {
-        return x509PrincipalMap;
-    }
-
     public String getFreeSubject() {
         return freeSubject;
     }
@@ -368,15 +345,14 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
     public X500Name subjectMapToX500Name() {
         X500NameBuilder nameBuilder = new X500NameBuilder(BCStyle.INSTANCE);
 
-        Set setKey = subjectMap.keySet();
-        for (Object aSetKey : setKey) {
-            String key = (String) aSetKey;
+        Set<String> setKey = subjectMap.keySet();
+        for (String key : setKey) {
             String value = subjectMap.get(key);
-            Object oidKey = null;
+            ASN1ObjectIdentifier oidKey;
             try {
                 oidKey = BCStyle.INSTANCE.attrNameToOID(key.toLowerCase());
                 if (oidKey != null && value != null && !value.equals("")) {
-                    nameBuilder.addRDN((ASN1ObjectIdentifier) oidKey, subjectMap.get(key));
+                    nameBuilder.addRDN(oidKey, subjectMap.get(key));
                     // i++;
                 } else {
                     log.debug("No OID: " + key);
@@ -494,10 +470,10 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
      */
     @Deprecated(/*forRemoval = true*/)
     public void setSubjectMap(Map<String, Object> elementMap) {
-        Iterator iter = elementMap.keySet().iterator();
+        Iterator<String> iter = elementMap.keySet().iterator();
         this.subjectMap.clear();
         while (iter.hasNext()) {
-            String key = (String) iter.next();
+            String key =  iter.next();
             Object value = elementMap.get(key);
             if (value instanceof String) {
                 this.subjectMap.put(key, (String) value);
@@ -657,19 +633,19 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
      *
      * @return X509Certificate - le certificate.
      */
-    public X509Certificate getCertificate() {
-        if (certificate == null && certificateChain != null)
+    public X509Certificate getX509Certificate() {
+        if (x509Certificate == null && certificateChain != null)
             return (X509Certificate) certificateChain[0];
-        return certificate;
+        return x509Certificate;
     }
 
     /**
      * Affecte le certificate.
      *
-     * @param certificate le certificate à affecter.
+     * @param x509Certificate le certificate à affecter.
      */
-    public void setCertificate(X509Certificate certificate) {
-        this.certificate = certificate;
+    public void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
     }
 
     /**
@@ -716,9 +692,9 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
      * @return
      */
     public String getName() {
-        if (subjectMap != null) {
-            return subjectMap.get("CN");
-        }
+        String name = subjectMap.get("CN");
+        if (name != null)
+            return name;
         return alias;
     }
 
@@ -756,33 +732,17 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
         return this;
     }
 
-    public Object clone() {
-        Certificate certificate = null;
-        try {
-            // On récupère l'instance à renvoyer par l'appel de la
-            // méthode super.clone()
-            certificate = (Certificate) super.clone();
-        } catch (CloneNotSupportedException cnse) {
-            // Ne devrait jamais arriver car nous implémentons
-            // l'interface Cloneable
-            cnse.printStackTrace(System.err);
-        }
-
-
-        // on renvoie le clone
-        return certificate;
-    }
-
     public boolean isAcceptChildAC() {
         return isContainsPrivateKey() && (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN));
     }
 
-    public CertificateType getCertificaType() {
+    public CertificateType getCertificateType() {
         if (isContainsPrivateKey()) {
             if (KeyUsages.isKeyUsage(getKeyUsage(), X509Constants.USAGE_CERTSIGN))
                 return CertificateType.AC;
             return CertificateType.STANDARD;
         }
+        log.debug("no private key found");
         return null;
     }
 
@@ -828,7 +788,7 @@ public class Certificate   implements MkCertificate<Certificate>, Cloneable, Cry
     public byte[] getEncoded() {
         byte[] encoded;
         try {
-             encoded = this.certificate.getEncoded();
+             encoded = this.x509Certificate.getEncoded();
         } catch (CertificateEncodingException e) {
             log.error("can't encode certificate", e);
             return null;

@@ -1,9 +1,11 @@
 package org.dpr.mykeys.app.keystore;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dpr.mykeys.app.NodeInfo;
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.dpr.mykeys.app.common.NodeInfo;
 import org.dpr.mykeys.app.certificate.Certificate;
 
 
@@ -13,7 +15,7 @@ import java.util.List;
 
 public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKeystoreValue {
 
-    public static final Log log = LogFactory.getLog(KeyStoreValue.class);
+    public static final Logger log = LogManager.getLogger(KeyStoreValue.class);
     private String name;
 
     private boolean isOpen = false;
@@ -38,12 +40,10 @@ public class KeyStoreValue extends SimpleKeystoreValue implements NodeInfo, MKKe
 
     private void checkFormat(StoreFormat format) {
         switch (format) {
-            case PEM:
-            case DER:
+            case PEM, DER -> {
                 isProtected = false;
                 isOpen = true;
-
-
+            }
         }
     }
 
