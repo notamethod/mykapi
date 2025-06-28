@@ -76,3 +76,5 @@ fabric.properties
 
 /mykeys-core/testgitignore.txt
 /.idea/sonarlint/issuestore/
+/.idea/sonarlint.xml
+/.idea/sonarlint-state.xml

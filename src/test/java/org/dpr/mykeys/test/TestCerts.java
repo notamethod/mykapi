@@ -1,14 +1,18 @@
 package org.dpr.mykeys.test;
 
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dpr.mykeys.app.utils.ServiceException;
-import org.dpr.mykeys.app.keystore.repository.MkKeystore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.keystore.*;
+import org.dpr.mykeys.app.keystore.KeyStoreValue;
+import org.dpr.mykeys.app.keystore.MKKeystoreValue;
+import org.dpr.mykeys.app.keystore.StoreFormat;
+import org.dpr.mykeys.app.keystore.repository.MkKeystore;
+import org.dpr.mykeys.app.utils.ProviderUtil;
+import org.dpr.mykeys.app.utils.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -120,17 +125,13 @@ public class TestCerts {
         assertEquals(1, ksInfo.getCertificates().size());
     }
 
-//    @Test
-//    public void TimeStamp() throws ServiceException {
-//        Security.addProvider(new BouncyCastleProvider());
-//
-//
-//        try {
-//            TimeStampToken tsp = TimeStampManager.getTimeStampToken(4);
-//            log.trace(tsp);
-//        } catch (Exception e) {
-//            log.error(e);
-//            fail();
-//        }
-//    }
+    @Test
+    @Disabled // ignored because very slow
+    public void test16k(){
+        Security.addProvider(new BouncyCastleProvider());
+        ProviderUtil.init("BC");//7/31
+        DummyData.BigKeypair(16384);
+       // DummyData.BigKeypair(8192);
+    }
+
 }

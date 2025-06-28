@@ -1,10 +1,10 @@
 package org.dpr.mykeys.test;
 
+import org.dpr.mykeys.app.certificate.Certificate;
+import org.dpr.mykeys.app.certificate.CertificateManager;
 import org.dpr.mykeys.app.certificate.CertificateType;
 import org.dpr.mykeys.app.common.PrivateKeyValue;
 import org.dpr.mykeys.app.utils.ServiceException;
-import org.dpr.mykeys.app.certificate.Certificate;
-import org.dpr.mykeys.app.certificate.CertificateManager;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -78,5 +78,17 @@ public class DummyData {
         PrivateKeyValue pkv = new PrivateKeyValue(pk);
         pkv.setEnvelop("PKCS8");
         return pkv;
+    }
+
+    public static PrivateKeyValue BigKeypair(int size){
+        CertificateManager certificateManager = new CertificateManager();
+        PrivateKey pk=null;
+        try {
+            KeyPair keyPair = certificateManager.generateKeyPair("RSA", size);
+            pk=keyPair.getPrivate();
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        }
+        return new PrivateKeyValue(pk);
     }
 }
