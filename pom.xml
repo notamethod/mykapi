@@ -3,15 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.notamethod</groupId>
     <version>1.1.1</version>
-    <name>Mykeys API</name>
-    <artifactId>mykapi</artifactId>
+    <name>Mykeys Core Module</name>
+    <artifactId>mykeys-core</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.7.1</junit.version>
         <bc.version>1.78</bc.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-        <sonar.projectKey>mykapi</sonar.projectKey>
+        <sonar.projectKey>mykeys-core</sonar.projectKey>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <lombok.version>1.18.38</lombok.version>
     </properties>

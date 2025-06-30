@@ -6,12 +6,12 @@ module mykapi {
     requires static lombok;
     requires org.apache.commons.io;
 
-    exports org.dpr.mykeys.app.keystore.repository;
-    exports org.dpr.mykeys.app.keystore.repository2;
-    exports org.dpr.mykeys.app.certificate;
-    exports org.dpr.mykeys.app.certificate.profile;
-    exports org.dpr.mykeys.app.keystore;
-    exports org.dpr.mykeys.app.utils;
-    exports org.dpr.mykeys.app.common;
-    exports org.dpr.mykeys.app.crl;
+    exports com.notamethod.mkcore.keystore.repository;
+    exports com.notamethod.mkcore.keystore.repository2;
+    exports com.notamethod.mkcore.certificate;
+    exports com.notamethod.mkcore.certificate.profile;
+    exports com.notamethod.mkcore.keystore;
+    exports com.notamethod.mkcore.utils;
+    exports com.notamethod.mkcore.common;
+    exports com.notamethod.mkcore.crl;
 }
