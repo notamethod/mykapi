@@ -1,4 +1,4 @@
-module mykapi {
+module mkcore {
     requires org.bouncycastle.provider;
     requires org.jetbrains.annotations;
     requires org.bouncycastle.pkix;
