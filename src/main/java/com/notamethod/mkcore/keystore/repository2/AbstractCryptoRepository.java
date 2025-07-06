@@ -46,7 +46,7 @@ public abstract class AbstractCryptoRepository implements CryptoRepository{
     public List findAllByType(CryptoObject.Type type) {
         return cryptoObjects.stream()
                 .filter(e -> e.getType().equals(type))
-                .collect(Collectors.toList());
+                .toList();
     }
 
 

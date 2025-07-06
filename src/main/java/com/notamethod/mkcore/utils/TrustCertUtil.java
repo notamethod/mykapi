@@ -209,8 +209,10 @@ class TrustCertUtil {
         // Set<X509Certificate> lstCert = new HashSet<X509Certificate>();
         // recherche des certificats dans le répertoire (*.cer ou *.CER)
 
-        IOFileFilter fileFilter = new WildcardFileFilter(
-                FILTRE_CERTIFICAT_X509, IOCase.INSENSITIVE);
+        IOFileFilter fileFilter = WildcardFileFilter.builder()
+                .setWildcards(FILTRE_CERTIFICAT_X509)
+                .setIoCase(IOCase.INSENSITIVE)
+                .get();
 
         IOFileFilter dirFilter = recursive ? TrueFileFilter.INSTANCE : null;
         Collection<File> lstFichiers = FileUtils.listFiles(new File(
@@ -330,7 +332,7 @@ class TrustCertUtil {
         try (FileInputStream is = new FileInputStream(f)) {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 
-            String password = "changeit"; //NOSONAR
+            String password = "changeit";
             keystore.load(is, password.toCharArray());
             return getTrustedCerts(keystore);
         } catch (FileNotFoundException e) {

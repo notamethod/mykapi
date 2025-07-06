@@ -144,7 +144,7 @@ public class CRLManager {
 
 		X509CRL crl = (X509CRL) cf.generateCRL(inStream);
 		if (log.isDebugEnabled()) {
-			log.debug("CRL issuer     -->" + crl.getIssuerDN()
+			log.debug("CRL issuer     -->" + crl.getIssuerX500Principal()
 					+ "Effective From -->" + crl.getThisUpdate()
 					+ "Next update    -->" + crl.getNextUpdate());
 		}

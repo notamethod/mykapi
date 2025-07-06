@@ -78,7 +78,7 @@ public class CSRManager {
             X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(in);
             certificates = new X509Certificate[]{certificate};
             if (certificate != null) {
-                log.info("certificate " + certificate.getSubjectDN().getName() + " created !");
+                log.info("certificate " + certificate.getSubjectX500Principal().getName() + " created !");
             }
             cert = new Certificate(certificates);
         } catch (GeneralSecurityException | OperatorCreationException e) {

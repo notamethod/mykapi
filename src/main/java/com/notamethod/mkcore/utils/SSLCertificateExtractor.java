@@ -131,7 +131,7 @@ public class SSLCertificateExtractor {
                 if (anchor == null) {
                     // Java doesn't have it... did the user give us a cert to test?
                     if (verifyCert != null) {
-                        if (certToVerify.getSubjectDN().equals(lastIssuer)) {
+                        if (certToVerify.getSubjectX500Principal().equals(lastIssuer)) {
                             printMessage("  and Java doesn't have this certificate as a trusted certificate.  " +
                                     "However, the certificate you passed to verify IS the correct root certificate!");
                             rootCert = certToVerify;
@@ -141,7 +141,7 @@ public class SSLCertificateExtractor {
                                     "root certificate.");
 
                             printMessage(String.format("Your certificate: %s\nRequired root: %s",
-                                    certToVerify.getSubjectDN(), rootCert.getSubjectDN()));
+                                    certToVerify.getSubjectX500Principal(), rootCert.getSubjectX500Principal()));
                             throw new Exception("Extraction error: " + EXIT_CERT_MISMATCH);
                         }
                     } else {
@@ -193,7 +193,7 @@ public class SSLCertificateExtractor {
     private X509Certificate findAnchor(Set<TrustAnchor> anchors, Principal certName) {
         for (TrustAnchor anchor :
                 anchors) {
-            if (anchor.getTrustedCert().getSubjectDN().equals(certName)) {
+            if (anchor.getTrustedCert().getSubjectX500Principal().equals(certName)) {
                 return anchor.getTrustedCert();
             }
         }
@@ -240,19 +240,19 @@ public class SSLCertificateExtractor {
             boolean badChain = false;
             for (X509Certificate cert : x509Certificates) {
                 printMessage("Certificate: ");
-                printMessage("  Subject: " + cert.getSubjectDN());
-                printMessage("  Issuer : " + cert.getIssuerDN());
+                printMessage("  Subject: " + cert.getSubjectX500Principal());
+                printMessage("  Issuer : " + cert.getIssuerX500Principal());
 
                 // Check to make sure chain is okay
-                if (lastIssuer != null && !cert.getSubjectDN().equals(lastIssuer)) {
+                if (lastIssuer != null && !cert. getSubjectX500Principal().equals(lastIssuer)) {
                     printMessage("ERROR: the certificate chain returned from the server looks incorrect.  The previous certificate's issuer does not match this certificate's subject!");
-                    printMessage(String.format("  expected: %s\n  but found: %s", lastIssuer, cert.getSubjectDN()));
+                    printMessage(String.format("  expected: %s\n  but found: %s", lastIssuer, cert. getSubjectX500Principal()));
                     badChain = true;
                 }
 
                 lastCert = cert;
-                lastIssuer = cert.getIssuerDN();
-                lastSubject = cert.getSubjectDN();
+                lastIssuer = cert.getIssuerX500Principal();
+                lastSubject = cert. getSubjectX500Principal();
                 certificateChain.add(cert);
             }
 
